@@ -1,0 +1,17 @@
+{
+  "name": "exploration_game",
+  "version": "1.0.0",
+  "description": "Exploration assistance for TTRPG",
+  "main": "./server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^6.0.7"
+  },
+  "files": [
+    "./server/api.js",
+    "./server/navigation.js"
+  ]
+}
