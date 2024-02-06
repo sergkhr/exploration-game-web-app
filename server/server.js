@@ -1,23 +1,29 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const apiRouter = require('./server/api');
+const apiRouter = require('./server/userApi');
 const navigation = require('./server/navigation');
 
-const JWT_SECRET = 'lhyiubpugopasgbUSVpgoasgSGSAhiog';
-
 mongoose.connect('mongodb://mongo:27017/exploration_game', {
-	useNewUrlParser: true,
-	useUnifiedTopology: true
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
 });
 
 app.use(express.static('client'));
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.use('/', navigation);
-app.use('/api', apiRouter);
+app.use('/api', apiRouter(mongoose.connection));
 
 
 app.listen(PORT, () => {

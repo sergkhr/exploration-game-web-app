@@ -17,6 +17,10 @@ COPY ../../server/server/ ./server
 # Copy client files
 COPY ../../client/ ./client
 
+# Copy environment variables
+COPY ../../.env ./
+COPY ../../config.js ./
+
 # Expose port 3000
 EXPOSE 3000
 

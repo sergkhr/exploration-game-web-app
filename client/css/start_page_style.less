@@ -1,9 +1,35 @@
 body{
     display: flex;
     justify-content: center;
-    align-items: center;
     padding: 0 var(--standart-gap);
 }
+#back-to-main-page{
+    position: fixed;
+    top: 20px;
+    left: 20px;
+
+    box-sizing: border-box;
+    width: 200px;
+    padding: var(--standart-gap);
+    background-color: rgba(var(--primary-light-color), 0.8);
+    border: none;
+    border-radius: 5px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, 
+                rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+    color: rgb(var(--white-color));
+    font-size: 1.5em;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all var(--standart-animation-time) cubic-bezier(.42,.1,.21,.99);
+
+    &:hover{
+        transform: translateY(-5px);
+        background-color: rgba(var(--primary-very-light-color), 0.8);
+        box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, 
+                    rgba(0, 0, 0, 0.22) 0px 10px 10px;
+    }
+}
+
 
 #container{
     display: flex;
@@ -12,6 +38,9 @@ body{
     justify-content: center;
     gap: calc(var(--standart-gap) * 2);
     width: 50%;
+    height: calc(100vh - var(--top-space) - var(--bottom-space));
+    margin-top: var(--top-space);
+
 
     .data-place{
         display: flex;
@@ -19,13 +48,21 @@ body{
         align-items: flex-end;
         position: relative;
         width: 100%;
+        flex-grow: 1;
 
         .data-block{
+            cursor: context-menu;
             position: absolute;
             p{
+                color: rgb(var(--primary-dark-color));
                 margin: 0;
                 font-size: 1.5em;
-                font-weight: 400;
+                font-weight: 700;
+            }
+
+            &.hidden{
+                opacity: 0;
+                pointer-events: none;
             }
         }
     }
@@ -36,15 +73,21 @@ body{
         align-items: flex-start;
         position: relative;
         width: 100%;
+        flex-grow: 1;
 
         .buttons-block{
             position: absolute;
             display: flex;
+            flex-wrap: wrap;
             gap: calc(var(--standart-gap) * 2);
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
-            padding: var(--standart-gap);
             width: 100%;
+            transition: opacity var(--standart-animation-time) ease;
+            &.hidden{
+                opacity: 0;
+                pointer-events: none;
+            }
 
             button{
                 box-sizing: border-box;
@@ -68,6 +111,87 @@ body{
                                 rgba(0, 0, 0, 0.22) 0px 10px 10px;
                 }
             }
+
+            .login-form{
+                display: flex;
+                flex-direction: column;
+                gap: var(--standart-gap);
+                width: 100%;
+                select{
+                    appearance: none;
+                    font-family: inherit;
+                    width: 100%;
+                    border: 0;
+                    border-bottom: 2px solid rgb(var(--gray-color));
+                    outline: 0;
+                    font-size: 1.3rem;
+                    color: rgb(var(--primary-dark-color));
+                    padding: 7px 0;
+                    background: transparent;
+                    transition: all var(--standart-animation-time) ease;
+
+                    option{
+                        color: rgb(var(--primary-dark-color));
+                    }
+                }
+
+                .for-input{
+                    position: relative;
+                    width: 100%;
+                    input{
+                        font-family: inherit;
+                        width: 100%;
+                        border: 0;
+                        border-bottom: 2px solid rgb(var(--gray-color));
+                        outline: 0;
+                        font-size: 1.3rem;
+                        color: rgb(var(--gray-color));
+                        padding-bottom: 7px;
+                        background: transparent;
+                        transition: all var(--standart-animation-time) ease;
+                        &::placeholder{
+                            color: transparent;
+                        }
+                        &:placeholder-shown ~ .label-text {
+                            font-size: 1.3rem;
+                            cursor: text;
+                            top: 5px;
+                        }
+                        &:focus{ 
+                            font-weight: 700;
+                            border-image: linear-gradient(to right, rgb(var(--primary-dark-color)),
+                                                                    rgb(var(--primary-color)));
+                            border-image-slice: 1;
+                            margin-top: 15px;
+
+                            & ~ .label-text{
+                                position: absolute;
+                                top: 0;
+                                display: block;
+                                transition: var(--standart-animation-time);
+                                font-size: 1rem;
+                                color: rgb(var(--primary-dark-color));
+                                font-weight:700;    
+                            } 
+                        }
+    
+                        & ~ .label-text{
+                            position: absolute;
+                            top: 0;
+                            display: block;
+                            transition: var(--standart-animation-time);
+                            font-size: 1rem;
+                            color: rgb(var(--primary-dark-color));
+                        }
+                    }
+                }
+            }
         }
+    }
+}
+
+@media (max-width: 900px) {
+    #container{
+        width: 90%;
     }
 }
