@@ -15,6 +15,17 @@ $(window).on('resize', function() {
 
 //___________________________________________________________________________________________
 // navigation click events
+backwardDirections = {
+    1: 1,
+    2: 1,
+    3: 1,
+    4: 2,
+    5: 3,
+    6: 5,
+    7: 5,
+    8: 5
+};
+
 function showNavigation(dataIndex){
     $(".data-block").addClass("hidden");
     $(".buttons-block").addClass("hidden");
@@ -45,6 +56,11 @@ function populatePlayersList(playersList, players) {
 $("#back-to-main-page").click(function() {
     showNavigation(1);
 });
+$("#back-button").click(function() {
+    let dataIndex = $(".data-block:not(.hidden)").data("index");
+    showNavigation(backwardDirections[dataIndex]);
+});
+
 $("#pick-player-role-btn").click(function() {
     getPlayersNames().then(players => {
         populatePlayersList($("#player-username-input"), players);
