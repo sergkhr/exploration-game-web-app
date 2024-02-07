@@ -2,12 +2,9 @@ body{
     display: flex;
     justify-content: center;
     padding: 0 var(--standart-gap);
+    overflow: hidden;
 }
-#back-to-main-page{
-    position: fixed;
-    top: 20px;
-    left: 20px;
-
+@button-style:{
     box-sizing: border-box;
     width: 200px;
     padding: var(--standart-gap);
@@ -28,6 +25,20 @@ body{
         box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, 
                     rgba(0, 0, 0, 0.22) 0px 10px 10px;
     }
+};
+#back-to-main-page{
+    @button-style();
+
+    position: fixed;
+    top: 20px;
+    left: 20px;
+}
+#back-button{
+    @button-style();
+    
+    position: fixed;
+    top: 20px;
+    right: 20px;
 }
 
 
@@ -90,26 +101,7 @@ body{
             }
 
             button{
-                box-sizing: border-box;
-                width: 200px;
-                padding: var(--standart-gap);
-                background-color: rgba(var(--primary-light-color), 0.8);
-                border: none;
-                border-radius: 5px;
-                box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, 
-                            rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
-                color: rgb(var(--white-color));
-                font-size: 1.5em;
-                font-weight: 400;
-                cursor: pointer;
-                transition: all var(--standart-animation-time) cubic-bezier(.42,.1,.21,.99);
-
-                &:hover{
-                    transform: translateY(-5px);
-                    background-color: rgba(var(--primary-very-light-color), 0.8);
-                    box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, 
-                                rgba(0, 0, 0, 0.22) 0px 10px 10px;
-                }
+                @button-style();
             }
 
             .login-form{
@@ -126,7 +118,7 @@ body{
                     outline: 0;
                     font-size: 1.3rem;
                     color: rgb(var(--primary-dark-color));
-                    padding: 7px 0;
+                    padding-bottom: 9px;
                     background: transparent;
                     transition: all var(--standart-animation-time) ease;
 
@@ -157,7 +149,8 @@ body{
                             cursor: text;
                             top: 5px;
                         }
-                        &:focus{ 
+
+                        @input-active:{
                             font-weight: 700;
                             border-image: linear-gradient(to right, rgb(var(--primary-dark-color)),
                                                                     rgb(var(--primary-color)));
@@ -173,6 +166,13 @@ body{
                                 color: rgb(var(--primary-dark-color));
                                 font-weight:700;    
                             } 
+                        };
+                        &:focus{ 
+                            @input-active();
+                        }
+                        // when input has some value
+                        &:not(:placeholder-shown) {
+                            @input-active();
                         }
     
                         & ~ .label-text{
@@ -185,11 +185,23 @@ body{
                         }
                     }
                 }
+
+                &.players-settings{
+                    width: calc(50% - var(--standart-gap) * 2);
+                    @media (max-width: 900px) {
+                        width: 100%;
+                        margin-bottom: calc(var(--standart-gap) * 2);
+                    }
+                }
             }
         }
     }
 }
-
+@media (max-width: 1400px) {
+    #container{
+        width: 75%;
+    }
+}
 @media (max-width: 900px) {
     #container{
         width: 90%;

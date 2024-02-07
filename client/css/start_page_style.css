@@ -2,11 +2,9 @@ body {
   display: flex;
   justify-content: center;
   padding: 0 var(--standart-gap);
+  overflow: hidden;
 }
 #back-to-main-page {
-  position: fixed;
-  top: 20px;
-  left: 20px;
   box-sizing: border-box;
   width: 200px;
   padding: var(--standart-gap);
@@ -19,8 +17,33 @@ body {
   font-weight: 400;
   cursor: pointer;
   transition: all var(--standart-animation-time) cubic-bezier(0.42, 0.1, 0.21, 0.99);
+  position: fixed;
+  top: 20px;
+  left: 20px;
 }
 #back-to-main-page:hover {
+  transform: translateY(-5px);
+  background-color: rgba(var(--primary-very-light-color), 0.8);
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
+}
+#back-button {
+  box-sizing: border-box;
+  width: 200px;
+  padding: var(--standart-gap);
+  background-color: rgba(var(--primary-light-color), 0.8);
+  border: none;
+  border-radius: 5px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
+  color: rgb(var(--white-color));
+  font-size: 1.5em;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all var(--standart-animation-time) cubic-bezier(0.42, 0.1, 0.21, 0.99);
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+#back-button:hover {
   transform: translateY(-5px);
   background-color: rgba(var(--primary-very-light-color), 0.8);
   box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
@@ -113,7 +136,7 @@ body {
   outline: 0;
   font-size: 1.3rem;
   color: rgb(var(--primary-dark-color));
-  padding: 7px 0;
+  padding-bottom: 9px;
   background: transparent;
   transition: all var(--standart-animation-time) ease;
 }
@@ -159,6 +182,21 @@ body {
   color: rgb(var(--primary-dark-color));
   font-weight: 700;
 }
+#container .buttons-place .buttons-block .login-form .for-input input:not(:placeholder-shown) {
+  font-weight: 700;
+  border-image: linear-gradient(to right, rgb(var(--primary-dark-color)), rgb(var(--primary-color)));
+  border-image-slice: 1;
+  margin-top: 15px;
+}
+#container .buttons-place .buttons-block .login-form .for-input input:not(:placeholder-shown) ~ .label-text {
+  position: absolute;
+  top: 0;
+  display: block;
+  transition: var(--standart-animation-time);
+  font-size: 1rem;
+  color: rgb(var(--primary-dark-color));
+  font-weight: 700;
+}
 #container .buttons-place .buttons-block .login-form .for-input input ~ .label-text {
   position: absolute;
   top: 0;
@@ -166,6 +204,20 @@ body {
   transition: var(--standart-animation-time);
   font-size: 1rem;
   color: rgb(var(--primary-dark-color));
+}
+#container .buttons-place .buttons-block .login-form.players-settings {
+  width: calc(50% - var(--standart-gap) * 2);
+}
+@media (max-width: 900px) {
+  #container .buttons-place .buttons-block .login-form.players-settings {
+    width: 100%;
+    margin-bottom: calc(var(--standart-gap) * 2);
+  }
+}
+@media (max-width: 1400px) {
+  #container {
+    width: 75%;
+  }
 }
 @media (max-width: 900px) {
   #container {

@@ -99,14 +99,14 @@ module.exports = function(mongooseConnection) {
 			await newUser.save();
 	
 			res.status(201).json({ message: 'User registered successfully' });
-		} catch (error) {
-			res.status(500).json({ error: 'Internal server error' });
+		} catch (e) {
+			res.status(500).json({ error: 'Internal server error ' + e});
 		}
 	}
 
 	async function deleteUser(req, res) {
 		try {
-			const { name } = req.params;
+			const name = req.query.name;
 
 			// Check if the user making the request is a master
 			if (req.user.role !== 'master') {
@@ -121,10 +121,10 @@ module.exports = function(mongooseConnection) {
 			}
 
 			// Delete the user
-			await User.delete({ name });
+			await User.deleteOne({ name });
 			res.json({ message: 'User deleted successfully' });
-		} catch (error) {
-			res.status(500).json({ error: 'Internal server error' });
+		} catch (e) {
+			res.status(500).json({ error: 'Internal server error ' + e});
 		}
 	}
 
@@ -156,21 +156,21 @@ module.exports = function(mongooseConnection) {
 		try {
 			const players = await User.find({ role: 'player' }).select('-password');
 			res.json(players);
-		} catch (error) {
-			res.status(500).json({ error: 'Internal server error' });
+		} catch (e) {
+			res.status(500).json({ error: 'Internal server error ' + e});
 		}
 	}
 
 	async function getPlayer(req, res) {
 		try {
-			const { username } = req.params;
+			const username = req.query.name;
 			const player = await User.findOne({ name: username, role: 'player' }).select('-password');
 			if (!player) {
 				return res.status(404).json({ error: 'Player not found' });
 			}
 			res.json(player);
-		} catch (error) {
-			res.status(500).json({ error: 'Internal server error' });
+		} catch (e) {
+			res.status(500).json({ error: 'Internal server error ' + e });
 		}
 	}
 
@@ -179,10 +179,10 @@ module.exports = function(mongooseConnection) {
 	// api endpoint
 	// we pass functions themselves as parameters to the router
 	router.post('/register', authenticateToken, registerUser);
-	router.delete('/users/:name', authenticateToken, deleteUser);
+	router.delete('/users', authenticateToken, deleteUser);
 	router.post('/login', loginUser);
 	router.get('/players', getPlayers);
-	router.get('/players/:username', getPlayer);
+	router.get('/getPlayer', getPlayer);
 
 
 	return router;

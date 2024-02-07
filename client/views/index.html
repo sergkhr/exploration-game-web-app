@@ -10,6 +10,7 @@
 </head>
 <body>
 	<button id="back-to-main-page">На главную</button>
+	<button id="back-button">Назад</button>
 	<div id="container">
 		<div class="data-place">
 			<div class="data-block" data-index="1">
@@ -30,6 +31,18 @@
 
 			<div class="data-block hidden" data-index="5">
 				<p>Добро пожаловать, чем займетесь?</p>
+			</div>
+
+			<div class="data-block hidden" data-index="6">
+				<p>Выберите игру, к которой присоединиться, в качестве мастера</p>
+			</div>
+
+			<div class="data-block hidden" data-index="7">
+				<p>Выберите карту, которую хотите настроить, или создать новую</p>
+			</div>
+
+			<div class="data-block hidden" data-index="8">
+				<p>Выберите, что делать</p>
 			</div>
 		</div>
 
@@ -68,14 +81,48 @@
 			<!--join game as a player-->
 			<div class="buttons-block hidden" data-index="4">
 				<!--this is example, it should be created via js from currently open games-->
-				<button class="join-game-btn" data-index="0">Игра 1</button>
+				<button class="player-pick-game-button" data-index="0">Игра 1</button>
 			</div>
 
 			<!--choose what to do as a master-->
 			<div class="buttons-block hidden" data-index="5">
 				<button id="master-join-game-button">Войти в игру</button>
-				<button id="master-set-game-button">Настроить игру</button>
+				<button id="master-set-map-button">Настроить игру</button>
 				<button id="set-users-button">Настроить игроков</button>
+			</div>
+
+			<!--join game as a master-->
+			<div class="buttons-block hidden" data-index="6">
+				<!--this is example, it should be created via js from currently open games-->
+				<button class="master-pick-game-button" data-index="0">Игра 1</button>
+			</div>
+
+			<!--set up map as a master-->
+			<div class="buttons-block hidden" data-index="7">
+				<!--this is example, it should be created via js from currently open games-->
+				<button class="master-pick-map-button" data-index="0">Игра 1</button>
+			</div>
+
+			<!--setting up players-->
+			<div class="buttons-block hidden" data-index="8">
+				<div class="login-form players-settings">
+					<label class="for-input">
+						<input type="text" id="new-player-name-input" placeholder="password" required>
+						<span class="label-text">Имя нового игрока</span>
+					</label>
+					<label class="for-input">
+						<input type="text" id="new-player-password-input" placeholder="password" required>
+						<span class="label-text">Пароль нового игрока</span>
+					</label>
+					<button id="create-player-button">Создать</button>
+				</div>
+
+				<div class="login-form players-settings">
+					<select id="player-username-deletion-input">
+						<option value="test_name">test_name</option>
+					</select>
+					<button id="delete-player-button">Удалить</button>
+				</div>
 			</div>
 		</div>
 	</div>
