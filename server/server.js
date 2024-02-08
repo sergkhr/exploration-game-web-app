@@ -5,8 +5,10 @@ const bodyParser = require('body-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const apiRouter = require('./server/userApi');
+const userApi = require('./server/userApi');
 const navigation = require('./server/navigation');
+const gameApi = require('./server/gameApi');
+
 
 mongoose.connect('mongodb://mongo:27017/exploration_game', {
     useNewUrlParser: true,
@@ -23,7 +25,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use('/', navigation);
-app.use('/api', apiRouter(mongoose.connection));
+app.use('/api', userApi(mongoose.connection));
+app.use('/api/games', gameApi(mongoose.connection));
 
 
 app.listen(PORT, () => {

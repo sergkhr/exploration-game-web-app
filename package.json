@@ -17,6 +17,7 @@
   "files": [
     "./server/userApi.js",
     "./server/navigation.js",
+    "./server/gameApi.js",
     "./config.js"
   ]
 }
