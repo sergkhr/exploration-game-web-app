@@ -8,3 +8,7 @@
 
 # File requarments
 - pictures for the content of cells should be named as the content in the cell (check in settings.js in server)
+
+# Functional logic
+- updating the map is mostly on the client side\
+    the server is only getting update request with whole map, when client saves the changes

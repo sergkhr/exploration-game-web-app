@@ -118,6 +118,69 @@ module.exports = function(mongooseConnection) {
         }
     }
 
+    async function updateGameMap(req, res) {
+        try {
+            // Check if the user making the request is a master
+            if (req.user.role !== 'master') {
+                return res.status(403).json({ error: 'Only master users are allowed to update maps' });
+            }
+    
+            const name = req.query.name; // Get the map name from the query params
+            const { settings, width, height, cells } = req.body; // Get updated map data from the request body
+    
+            // Find the map by name
+            const map = await GameMap.findOne({ name });
+            if (!map) {
+                return res.status(404).json({ error: 'Map not found' });
+            }
+    
+            // Update map fields if provided in the request body
+            if (settings) {
+                map.settings = settings;
+            }
+            if (width) {
+                map.width = width;
+            }
+            if (height) {
+                map.height = height;
+            }
+            if (cells) {
+                map.cells = cells;
+            }
+    
+            // Save the updated map
+            await map.save();
+    
+            res.json({ message: 'Map updated successfully' });
+        } catch (e) {
+            console.error('Error updating game map:', error);
+            res.status(500).json({ error: 'Internal server error ' + e });
+        }
+    }
+
+    async function deleteGameMap(req, res) {
+        try {
+            // Check if the user making the request is a master
+            if (req.user.role !== 'master') {
+                return res.status(403).json({ error: 'Only master users are allowed to delete maps' });
+            }
+    
+            const name = req.query.name; // Get the map name from the query params
+    
+            // Find the map by name and delete it
+            const deletedMap = await GameMap.findOneAndDelete({ name });
+
+            if (!deletedMap) {
+                return res.status(404).json({ error: 'Map not found' });
+            }
+
+            res.json({ message: 'Map deleted successfully' });
+        } catch (e) {
+            console.error('Error deleting game map:', error);
+            res.status(500).json({ error: 'Internal server error ' + e });
+        }
+    }
+
     //________________________________________________________________________________________________
     // game api
     const gameSchema = new mongoose.Schema({
@@ -140,6 +203,8 @@ module.exports = function(mongooseConnection) {
 	router.get('/maps', authenticateToken, getGameMapsNames);
     router.get('/maps', authenticateToken, getGameMapByName); // ?name=mapName
     router.post('/maps', authenticateToken, createGameMap);
+    router.put('/maps', authenticateToken, updateGameMap); // ?name=mapName
+    router.delete('/maps', authenticateToken, deleteGameMap); // ?name=mapName
 
 
 	return router;
