@@ -38,7 +38,7 @@
 			</div>
 
 			<div class="data-block hidden" data-index="7">
-				<p>Выберите карту, которую хотите настроить, или создать новую</p>
+				<p>Выберите карту, которую хотите настроить, или создайте новую</p>
 			</div>
 
 			<div class="data-block hidden" data-index="8">
@@ -87,7 +87,7 @@
 			<!--choose what to do as a master-->
 			<div class="buttons-block hidden" data-index="5">
 				<button id="master-join-game-button">Войти в игру</button>
-				<button id="master-set-map-button">Настроить игру</button>
+				<button id="master-set-map-button">Настроить карты</button>
 				<button id="set-users-button">Настроить игроков</button>
 			</div>
 
@@ -100,7 +100,31 @@
 			<!--set up map as a master-->
 			<div class="buttons-block hidden" data-index="7">
 				<!--this is example, it should be created via js from currently open games-->
-				<button class="master-pick-map-button" data-index="0">Игра 1</button>
+				<div class="login-form players-settings">
+					<select id="map-name-selection">
+						<option value="test_name">test_name</option>
+					</select>
+					<button id="configure-map-button">Редактировать карту</button>
+					<button id="delete-map-button">Удалить карту</button>
+				</div>
+
+				<div class="login-form players-settings">
+					<label class="for-input">
+						<input type="text" id="new-map-name-input" placeholder="map-name" required>
+						<span class="label-text">Название новой карты</span>
+					</label>
+					<div class="horizontal-input">
+						<label class="for-input">
+							<input type="number" id="new-map-width-input" placeholder="map-width" required>
+							<span class="label-text">Ширина</span>
+						</label>
+						<label class="for-input">
+							<input type="number" id="new-map-height-input" placeholder="map-height" required>
+							<span class="label-text">Высота</span>
+						</label>
+					</div>
+					<button id="create-map-button">Создать карту</button>
+				</div>
 			</div>
 
 			<!--setting up players-->

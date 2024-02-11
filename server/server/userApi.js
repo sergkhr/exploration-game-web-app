@@ -155,6 +155,7 @@ module.exports = function(mongooseConnection) {
 			const players = await User.find({ role: 'player' }).select('-password');
 			res.json(players);
 		} catch (e) {
+			console.error('Error getting players:', e);
 			res.status(500).json({ error: 'Internal server error ' + e});
 		}
 	}
@@ -168,6 +169,20 @@ module.exports = function(mongooseConnection) {
 			}
 			res.json(player);
 		} catch (e) {
+			console.error('Error getting player:', e);
+			res.status(500).json({ error: 'Internal server error ' + e });
+		}
+	}
+
+	async function checkIfMaster(req, res){
+		try {
+			if (req.user.role !== 'master') {
+				return res.status(403).json({ error: 'Only master users are allowed here' });
+			}
+
+			res.status(200).json({ message: 'Master user' });
+		} catch (e) {
+			console.error('Error getting user role:', e);
 			res.status(500).json({ error: 'Internal server error ' + e });
 		}
 	}
@@ -181,6 +196,7 @@ module.exports = function(mongooseConnection) {
 	router.post('/login', loginUser);
 	router.get('/players', getPlayers);
 	router.get('/getPlayer', getPlayer);
+	router.get('/checkIfMaster', authenticateToken, checkIfMaster);
 
 
 	return router;

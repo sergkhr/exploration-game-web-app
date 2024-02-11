@@ -1,5 +1,4 @@
 
-
 function loadResizeCommon(){
     resizeContainerForContent($('#container .data-place'), ".data-block");
     resizeContainerForContent($('#container .buttons-place'), ".buttons-block");
@@ -33,23 +32,10 @@ function showNavigation(dataIndex){
     $(`.data-block[data-index=${dataIndex}]`).removeClass("hidden");
     $(`.buttons-block[data-index=${dataIndex}]`).removeClass("hidden");
 }
-async function getPlayersNames(){
-    try {
-        const data = await $.get("/api/players");
-        if (data.error) {
-            alert(data.error);
-            return [];
-        }
-        return data.map(player => player.name);
-    } catch (error) {
-        console.error("Error fetching players:", error);
-        return [];
-    }
-}
-function populatePlayersList(playersList, players) {
-    playersList.empty();
-    players.forEach(player => {
-        playersList.append(`<option value="${player}">${player}</option>`);
+function populateSelectionList(listElement, children) {
+    listElement.empty();
+    children.forEach(child => {
+        listElement.append(`<option value="${child}">${child}</option>`);
     });
 }
 
@@ -63,7 +49,7 @@ $("#back-button").click(function() {
 
 $("#pick-player-role-btn").click(function() {
     getPlayersNames().then(players => {
-        populatePlayersList($("#player-username-input"), players);
+        populateSelectionList($("#player-username-input"), players);
     });
     showNavigation(2);
 });
@@ -126,19 +112,34 @@ $("#master-join-game-button").click(function() {
 });
 
 $("#master-set-map-button").click(function() {
-    //TODO: load existing maps list
+    getGameMaps().then(maps => {
+        populateSelectionList($("#map-name-selection"), maps);
+    });
     showNavigation(7);
 });
 
 $("#set-users-button").click(function() {
     getPlayersNames().then(players => {
-        populatePlayersList($("#player-username-deletion-input"), players);
+        populateSelectionList($("#player-username-deletion-input"), players);
     });
     showNavigation(8);
 });
 
 //___________________________________________________________________________________________
 // work with player accounts
+async function getPlayersNames(){
+    try {
+        const data = await $.get("/api/players");
+        if (data.error) {
+            alert(data.error);
+            return [];
+        }
+        return data.map(player => player.name);
+    } catch (error) {
+        console.error("Error fetching players:", error);
+        return [];
+    }
+}
 function createPlayer(playerName, playerPassword) {
     return new Promise((resolve, reject) => {
         if (!playerName || !playerPassword || playerName === "" || playerPassword === "") {
@@ -177,7 +178,7 @@ $("#create-player-button").click(function() {
     createPlayer(playerName, playerPassword).then(() => {
         console.log("Player created");
         getPlayersNames().then(players => {
-            populatePlayersList($("#player-username-deletion-input"), players);
+            populateSelectionList($("#player-username-deletion-input"), players);
         });
     }).catch(error => {
         alert("Error during player creation: " + error);
@@ -222,10 +223,155 @@ $("#delete-player-button").click(function() {
     deletePlayer(playerName).then(() => {
         console.log("Player deleted");
         getPlayersNames().then(players => {
-            populatePlayersList($("#player-username-deletion-input"), players);
+            populateSelectionList($("#player-username-deletion-input"), players);
         });
     }).catch(error => {
         alert("Error during player deletion: " + error);
         console.error("Error during player deletion:", error);
     });
+});
+
+//___________________________________________________________________________________________
+// work with game maps
+function getGameMaps() {
+    return new Promise((resolve, reject) => {
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            url: "/api/games/maps",
+            type: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}
+function createGameMap(mapName, mapWidth, mapHeight) {
+    return new Promise((resolve, reject) => {
+        if (!mapName || mapName === "") {
+            reject("Map name is empty");
+            return;
+        }
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            url: "/api/games/maps",
+            type: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            data: { name: mapName, width: mapWidth, height: mapHeight},
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}
+
+$("#create-map-button").click(function() {
+    let mapName = $("#new-map-name-input").val();
+    let mapWidth = parseInt($("#new-map-width-input").val());
+    let mapHeight = parseInt($("#new-map-height-input").val());
+    if (!mapName || mapName === "" || !mapWidth || mapWidth === "" ||
+            !mapHeight || mapHeight === "") {
+        alert("Please enter the map name, width and height");
+        return;
+    }
+
+    if (!Number.isInteger(mapWidth) || !Number.isInteger(mapHeight) ||
+            mapWidth <= 0 || mapHeight <= 0) {
+        alert("Width and height should be positive integers");
+        return;
+    }
+    
+    createGameMap(mapName, mapWidth, mapHeight).then(() => {
+        console.log("Map created");
+        getGameMaps().then(maps => {
+            populateSelectionList($("#map-name-selection"), maps);
+        });
+    }).catch(error => {
+        alert("Error during map creation: " + error);
+        console.error("Error during map creation:", error);
+    });
+});
+
+function deleteGameMap(mapName) {
+    return new Promise((resolve, reject) => {
+        if (mapName == "") {
+            reject("Map name is empty");
+            return;
+        }
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            //query parameter name
+            url: `/api/games/maps?name=${mapName}`,
+            type: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}
+
+$("#delete-map-button").click(function() {
+    let mapName = $("#map-name-selection").val();
+    if (!mapName || mapName === "") {
+        alert("Please select the map name");
+        return;
+    }
+
+    if (confirm(`Are you sure you want to delete the map "${mapName}"?`)) {
+        deleteGameMap(mapName).then(() => {
+            console.log("Map deleted");
+            getGameMaps().then(maps => {
+                populateSelectionList($("#map-name-selection"), maps);
+            });
+        }).catch(error => {
+            alert("Error during map deletion: " + error);
+            console.error("Error during map deletion:", error);
+        });
+    }
+});
+
+function goToConfigureMap(mapName){
+    //store the map name in the session storage
+    sessionStorage.setItem("configureMapName", mapName);
+    let token = sessionStorage.getItem("token");
+    if (!token) {
+        alert("No token found");
+        return;
+    }
+
+    window.location.href = "/setting_map";
+}
+
+$("#configure-map-button").click(function() {
+    let mapName = $("#map-name-selection").val();
+    if (!mapName || mapName === "") {
+        alert("Please select the map name");
+        return;
+    }
+    goToConfigureMap(mapName);
 });

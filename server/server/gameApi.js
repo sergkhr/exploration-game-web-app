@@ -1,5 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -87,6 +88,39 @@ module.exports = function(mongooseConnection) {
             if (req.user.role !== 'master') {
                 return res.status(403).json({ error: 'Only master users are allowed to create maps' });
             }
+
+            let { name, settings, width, height } = req.body;
+
+            if (!name || !width || !height) {
+                return res.status(400).json({ error: 'Invalid request' });
+            }
+            const existingMap = await GameMap.findOne({name});
+            if (existingMap) {
+                return res.status(400).json({ error: 'Map with this name already exists' });
+            }
+
+            width = parseInt(width);
+            height = parseInt(height);
+
+            // if settings are not provided, use the first variants from the settings as default
+            if (!settings || !settings.floor || !settings.space) {
+                if(!settings) {
+                    settings = {};
+                }
+                if(!settings.floor) {
+                    settings.floor = floorVariants[0];
+                }
+                if(!settings.space) {
+                    settings.space = spaceVariants[0];
+                }
+            }
+
+            if (!Number.isInteger(width) || !Number.isInteger(height) ||
+            width <= 0 || height <= 0) {
+                res.status(400).json({ error: 'Invalid map dimensions' });
+                return;
+            }
+
             let defaultCellsArray = Array.from({ length: height }, () =>
                 Array.from({ length: width }, () => ({
                     isClosed: true,
@@ -94,15 +128,6 @@ module.exports = function(mongooseConnection) {
                     content: []
                 }))
             );
-
-            const { name, settings, width, height } = req.body;
-            if (!name || !settings || !width || !height) {
-                return res.status(400).json({ error: 'Invalid request' });
-            }
-            const existingMap = await GameMap.findOne({name});
-            if (existingMap) {
-                return res.status(400).json({ error: 'Map with this name already exists' });
-            }
 
             const map = new GameMap({
                 name,
@@ -129,7 +154,7 @@ module.exports = function(mongooseConnection) {
             const { settings, width, height, cells } = req.body; // Get updated map data from the request body
     
             // Find the map by name
-            const map = await GameMap.findOne({ name });
+            let map = await GameMap.findOne({ name });
             if (!map) {
                 return res.status(404).json({ error: 'Map not found' });
             }
@@ -201,7 +226,7 @@ module.exports = function(mongooseConnection) {
 	// api endpoint
 	// we pass functions themselves as parameters to the router
 	router.get('/maps', authenticateToken, getGameMapsNames);
-    router.get('/maps', authenticateToken, getGameMapByName); // ?name=mapName
+    router.get('/getMap', authenticateToken, getGameMapByName); // ?name=mapName
     router.post('/maps', authenticateToken, createGameMap);
     router.put('/maps', authenticateToken, updateGameMap); // ?name=mapName
     router.delete('/maps', authenticateToken, deleteGameMap); // ?name=mapName

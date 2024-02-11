@@ -2,7 +2,7 @@ body {
   display: flex;
   justify-content: center;
   padding: 0 var(--standart-gap);
-  overflow: hidden;
+  overflow: auto;
 }
 #back-to-main-page {
   box-sizing: border-box;
@@ -56,7 +56,7 @@ body {
   gap: calc(var(--standart-gap) * 2);
   width: 50%;
   height: calc(100vh - var(--top-space) - var(--bottom-space));
-  margin-top: var(--top-space);
+  padding-top: var(--top-space);
 }
 #container .data-place {
   display: flex;
@@ -155,7 +155,8 @@ body {
   outline: 0;
   font-size: 1.3rem;
   color: rgb(var(--gray-color));
-  padding-bottom: 7px;
+  padding: 0;
+  padding-top: 7px;
   background: transparent;
   transition: all var(--standart-animation-time) ease;
 }
@@ -204,6 +205,14 @@ body {
   transition: var(--standart-animation-time);
   font-size: 1rem;
   color: rgb(var(--primary-dark-color));
+}
+#container .buttons-place .buttons-block .login-form .horizontal-input {
+  display: flex;
+  gap: var(--standart-gap);
+  justify-content: space-between;
+}
+#container .buttons-place .buttons-block .login-form .horizontal-input .for-input {
+  width: calc(50% - var(--standart-gap));
 }
 #container .buttons-place .buttons-block .login-form.players-settings {
   width: calc(50% - var(--standart-gap) * 2);

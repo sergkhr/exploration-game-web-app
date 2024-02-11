@@ -2,7 +2,7 @@ body{
     display: flex;
     justify-content: center;
     padding: 0 var(--standart-gap);
-    overflow: hidden;
+    overflow: auto;
 }
 @button-style:{
     box-sizing: border-box;
@@ -50,7 +50,7 @@ body{
     gap: calc(var(--standart-gap) * 2);
     width: 50%;
     height: calc(100vh - var(--top-space) - var(--bottom-space));
-    margin-top: var(--top-space);
+    padding-top: var(--top-space);
 
 
     .data-place{
@@ -138,7 +138,8 @@ body{
                         outline: 0;
                         font-size: 1.3rem;
                         color: rgb(var(--gray-color));
-                        padding-bottom: 7px;
+                        padding: 0;
+                        padding-top: 7px;
                         background: transparent;
                         transition: all var(--standart-animation-time) ease;
                         &::placeholder{
@@ -183,6 +184,14 @@ body{
                             font-size: 1rem;
                             color: rgb(var(--primary-dark-color));
                         }
+                    }
+                }
+                .horizontal-input{
+                    display: flex;
+                    gap: var(--standart-gap);
+                    justify-content: space-between;
+                    .for-input{
+                        width: calc(50% - var(--standart-gap));
                     }
                 }
 
