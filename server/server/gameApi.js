@@ -6,7 +6,10 @@ const router = express.Router();
 
 const {JWT_SECRET} = require('../config');
 
-const {floorVariants, spaceVariants, contentVariants} = require('./settings');
+const {floorVariants_full, spaceVariants_full, contentVariants_full} = require('./settings');
+let floorVariants = floorVariants_full.map(variant => Object.keys(variant)[0]);
+let spaceVariants = spaceVariants_full.map(variant => Object.keys(variant)[0]);
+let contentVariants = contentVariants_full.map(variant => Object.keys(variant)[0]);
 
 
 // Middleware to verify JWT token
@@ -30,6 +33,15 @@ function authenticateToken(req, res, next) {
 // Export the router
 // actual implementation is also here
 module.exports = function(mongooseConnection) {
+    async function getSettings(req, res) {
+        try {
+            res.json({ floorVariants_full, spaceVariants_full, contentVariants_full });
+        } catch (e) {
+            res.status(500).json({ error: 'Internal server error ' + e});
+        }
+    }
+
+    //maps api
     const contentScheme = new mongoose.Schema({
         type: {type: String, enum: contentVariants, required: true},
         isHidden: {type: Boolean, required: true}
@@ -225,6 +237,7 @@ module.exports = function(mongooseConnection) {
 	//________________________________________________________________________________________________
 	// api endpoint
 	// we pass functions themselves as parameters to the router
+    router.get('/settings', getSettings);
 	router.get('/maps', authenticateToken, getGameMapsNames);
     router.get('/getMap', authenticateToken, getGameMapByName); // ?name=mapName
     router.post('/maps', authenticateToken, createGameMap);
