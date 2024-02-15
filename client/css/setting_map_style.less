@@ -1,6 +1,6 @@
 :root{
     --hexagon-size: 150px; //size of hexagon from side to side
-    --hexagin-side-size: calc(var(--hexagon-size) * tan(30deg)); 
+    --hexagon-side-size: calc(var(--hexagon-size) * tan(30deg)); 
 }
 
 body{
@@ -128,7 +128,7 @@ body{
     };
     .hex {
         width: var(--hexagon-size);
-        height: var(--hexagin-side-size);
+        height: var(--hexagon-side-size);
         background-color: #ccc;
         background-repeat: no-repeat;
         background-position: 50% 50%;
@@ -139,6 +139,18 @@ body{
         text-align:center;
         zoom:1;
         @hexagon-border();
+
+        .inner{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
+            width: 100%;
+            height: 100%;
+            .content_icon{
+                width: -webkit-fill-available;
+                max-width: var(--hexagon-side-size);
+                max-height: var(--hexagon-side-size);
+            }
+        }
 
         .corner-1, .corner-2 {
             position: absolute;

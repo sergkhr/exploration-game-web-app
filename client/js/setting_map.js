@@ -51,3 +51,19 @@ $(document).ready(function() {
         window.location.href = '/';
     });
 });
+
+
+
+
+
+/**
+ * Add content to a hexagon
+ * 
+ * @param {jquery object} content all DOM elemnts to put inside the hexagon
+ * @param {jquery object} hexagon the hexagon to add the content to
+ */
+function addContentToHexagon(content, hexagon) {
+    let $inner = hexagon.find('.inner');
+    $inner.append(content);
+    hexagon.append($inner);
+}

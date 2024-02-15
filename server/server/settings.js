@@ -11,21 +11,21 @@ const spaceVariants = [
 // content variants
 // keys are the names of the content, values are the names of the images
 let contentVariants = [
-    {"camp": "camp_icon.png"}, //camp
-    {"cave": "cave_icon.png"}, //caves, different types
+    {"camp": "camp_icon.svg"}, //camp
+    {"cave": "cave_icon.svg"}, //caves, different types
 ]
 const risks = [
-    {"risk_1": "risk_1_icon.png"}, //risk low level
-    {"risk_2": "risk_2_icon.png"}, //risk medium level
-    {"risk_3": "risk_3_icon.png"}, //risk high level
-    {"risk_4": "risk_4_icon.png"} //risk very high level
+    {"risk_1": "risk_1_icon.svg"}, //risk low level
+    {"risk_2": "risk_2_icon.svg"}, //risk medium level
+    {"risk_3": "risk_3_icon.svg"}, //risk high level
+    {"risk_4": "risk_4_icon.svg"} //risk very high level
 ]
 contentVariants = contentVariants.concat(risks);
 const buildings = [
-    {"building_1": "building_1_icon.png"}, //small buildings
-    {"building_2": "building_2_icon.png"}, //medium buildings
-    {"building_3": "building_3_icon.png"}, //large buildings
-    {"building_broken": "building_broken_icon.png"} //broken or very poor buildings
+    {"building_1": "building_1_icon.svg"}, //small buildings
+    {"building_2": "building_2_icon.svg"}, //medium buildings
+    {"building_3": "building_3_icon.svg"}, //large buildings
+    {"building_broken": "building_broken_icon.svg"} //broken or very poor buildings
 ]
 contentVariants = contentVariants.concat(buildings);
 
