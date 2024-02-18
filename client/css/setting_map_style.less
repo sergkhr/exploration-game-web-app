@@ -1,6 +1,11 @@
 :root{
     --hexagon-size: 150px; //size of hexagon from side to side
     --hexagon-side-size: calc(var(--hexagon-size) * tan(30deg)); 
+    --hexagon-gap: 5px;
+
+    --floor-color: 0, 153, 0; 
+    --space-color: 0, 0, 153;
+
 }
 
 body{
@@ -119,6 +124,13 @@ body{
     justify-content: center;
     align-items: center;
 
+    #map_container{
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: transform 0.1s ease;
+    }
+
     //______________________________________________________________________________________
     //______________________________________________________________________________________
     //hexagons
@@ -129,13 +141,18 @@ body{
     .hex {
         width: var(--hexagon-size);
         height: var(--hexagon-side-size);
-        background-color: #ccc;
+        opacity: 0.8;
+        // box-sizing: border-box;
+        background-color: rgba(var(--floor-color), 0.8);
+        &.space{
+            background-color: rgba(var(--space-color), 0.8);
+        }
         background-repeat: no-repeat;
         background-position: 50% 50%;
         background-size: auto var(--hexagon-size);
-        position: relative;
+        position: absolute;
         float:left;
-        margin:25px 5px;
+        // margin:25px 5px;
         text-align:center;
         zoom:1;
         @hexagon-border();
@@ -155,9 +172,9 @@ body{
         .corner-1, .corner-2 {
             position: absolute;
             top:0;
-            left:0;
-            width:100%;
-            height:100%;
+            left:-1px;
+            width: var(--hexagon-size);
+            height: var(--hexagon-side-size);
             background: inherit;
             z-index:-2;
             overflow:hidden;

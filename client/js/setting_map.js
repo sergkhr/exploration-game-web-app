@@ -35,6 +35,22 @@ function getSettings() {
         });
     });
 }
+function getMapByName(mapName) {
+    return new Promise((resolve, reject) => {
+        let token = sessionStorage.getItem('token');
+        $.ajax({
+            url: '/api/games/getMap?name=' + mapName,
+            type: 'GET',
+            headers: { "Authorization": `Bearer ${token}` },
+            success: function(data) {
+                resolve(data);
+            },
+            error: function(data) {
+                reject(data);
+            }
+        });
+    });
+}
 
 $(document).ready(function() {
     checkIfMasterUser().then(() => {
@@ -43,6 +59,14 @@ $(document).ready(function() {
             floorVariants_full = data.floorVariants_full;
             spaceVariants_full = data.spaceVariants_full;
             contentVariants_full = data.contentVariants_full;
+        }).catch((error) => {
+            console.log(error);
+        });
+
+
+        let mapName = sessionStorage.getItem('configureMapName');
+        getMapByName(mapName).then((map) => {
+            populateMap(map);
         }).catch((error) => {
             console.log(error);
         });
@@ -55,6 +79,31 @@ $(document).ready(function() {
 
 
 
+function populateMap(map){
+    let mapName = map.name;
+    let floor_type = map.settings.floor;
+    let space_type = map.settings.space;
+    let column_number = parseFloat(map.width);
+    let row_number = parseFloat(map.height);
+    let cells = map.cells;
+    
+    let hex_horizontal_width = parseFloat($('html').css('--hexagon-size'));
+    let hex_vertical_width = hex_horizontal_width * Math.tan(Math.PI / 6);
+    let hex_gap = parseFloat($('html').css('--hexagon-gap'));
+
+    let container = $("#map_container");
+    container.empty();
+    let calculated_cont_width = (column_number + 0.5) * hex_horizontal_width + (column_number - 1 + 0.5) * hex_gap;
+    let calculated_cont_height = (row_number * 1.5 + 0.5) * hex_vertical_width + (row_number - 1) * hex_gap * Math.sin(Math.PI / 3);
+    container.css('width', calculated_cont_width + 'px');
+    container.css('height', calculated_cont_height + 'px');
+
+    cells.forEach((row, i) => {
+        row.forEach((cell, j) => {
+            
+        });
+    });
+}
 
 /**
  * Add content to a hexagon
