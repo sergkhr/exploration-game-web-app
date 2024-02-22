@@ -35,12 +35,13 @@ function resizeContainerForContent(container, childrenSelector=null) {
  * @param {int} x horizontal position of hexagon left top corner from left
  * @param {int} y vertical position of hexagon left top corner from top
  * @param {jquery object} container the container that will hold the map
+ * @param {boolean} isFloor if the hexagon is a floor or a space
  */
-function createHexagon(content, x, y, container){
+function createHexagon(content, x, y, container, isFloor=true, isClosed=true){
     let hexagon = $('<div class="hex"></div>');
 
     // Create the inner div and add the content
-    let $inner = $('<div class="inner"></div>').text(content);
+    let $inner = $('<div class="inner"></div>').html(content);
 
     // Create the corner divs
     let $corner1 = $('<div class="corner-1"></div>');
@@ -51,7 +52,9 @@ function createHexagon(content, x, y, container){
 
     hexagon.css('left', x);
     hexagon.css('top', y);
-    
+
+    if(!isFloor) hexagon.addClass('space');
+    if(isClosed) hexagon.addClass('closed');
     
     container.append(hexagon);
 }
