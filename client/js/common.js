@@ -58,3 +58,146 @@ function createHexagon(content, x, y, container, isFloor=true, isClosed=true){
     
     container.append(hexagon);
 }
+
+
+//________________________________________________________________________________________________
+// controlling the map
+function debounce(func, delay) {
+    let timeoutId;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(context, args);
+        }, delay);
+    };
+}
+
+function limitTranslationX(translateX, scale, map_container, outer_container, gap=300) {
+    let map_c = $(map_container);
+    let outer_c = $(outer_container);
+    let TranslateX_limit = map_c.width() * scale / 2 + outer_c.width() / 2 - gap;
+    return Math.min(TranslateX_limit, Math.max(-TranslateX_limit, translateX));
+}
+function limitTranslationY(translateY, scale, map_container, outer_container, gap=300) {
+    let map_c = $(map_container);
+    let outer_c = $(outer_container);
+    let TranslateY_limit = map_c.height() * scale / 2 + outer_c.height() / 2 - gap;
+    return Math.min(TranslateY_limit, Math.max(-TranslateY_limit, translateY));
+}
+
+function resizeMap(event, map_container, outer_container){
+    // Get the current scale of the inner div
+    let currentTransform = map_container.css('transform');
+    let currentScale = 1;
+    let minScale = 0.2 * currentScale;
+    let maxScale = 2 * currentScale;
+
+    let currentTranslateX = 0;
+    let currentTranslateY = 0;
+    
+    // Parse the current transform to get scale and translation values
+    if (currentTransform && currentTransform !== 'none') {
+        const transformValues = currentTransform.match(/-?[\d\.]+/g);
+        if (transformValues.length === 6) { // Check if it includes scale and translate
+            currentScale = parseFloat(transformValues[0]);
+            currentTranslateX = parseFloat(transformValues[4]);
+            currentTranslateY = parseFloat(transformValues[5]);
+        }
+    }
+    
+    
+
+    // Adjust the scale based on the direction of wheel scrolling
+    let scaleChange = event.originalEvent.deltaY > 0 ? 0.9 : 1.1; // Adjust the scale factor as needed
+    let newScale = currentScale * scaleChange;
+
+    newScale = Math.max(minScale, Math.min(maxScale, newScale)); 
+    let newTranslateX = currentTranslateX * newScale / currentScale;
+    let newTranslateY = currentTranslateY * newScale / currentScale;
+
+    newTranslateX = limitTranslationX(newTranslateX, newScale, map_container, outer_container);
+    newTranslateY = limitTranslationY(newTranslateY, newScale, map_container, outer_container);
+
+    // Apply the new scale to the inner div
+    map_container.css('transform', `translate(${newTranslateX}px, ${newTranslateY}px) scale(${newScale})`);
+
+    event.preventDefault();
+}
+
+
+
+// Function to handle right mouse button drag
+function handleDrag(element, container) {
+    let isDragging = false;
+    let startX, startY, initialX, initialY;
+  
+    // Disable right-click context menu
+    container.addEventListener('contextmenu', function(event) {
+        event.preventDefault();
+    });
+  
+    // Mouse down event listener
+    container.addEventListener('mousedown', function(event) {
+        if (event.button === 2) { // Check if right mouse button is clicked
+            isDragging = true;
+            startX = event.clientX;
+            startY = event.clientY;
+            initialX = getTranslateX(element);
+            initialY = getTranslateY(element);
+        }
+    });
+  
+    // Mouse move event listener
+    container.addEventListener('mousemove', function(event) {
+        if (isDragging) {
+            const deltaX = event.clientX - startX;
+            const deltaY = event.clientY - startY;
+            const scale = getScale(element);
+            let newTranslateX = initialX + deltaX;
+            let newTranslateY = initialY + deltaY;
+            newTranslateX = limitTranslationX(newTranslateX, scale, element, container);
+            newTranslateY = limitTranslationY(newTranslateY, scale, element, container);
+
+            element.style.transform = `translate(${newTranslateX}px, ${newTranslateY}px) scale(${scale})`;
+        }
+    });
+  
+    // Mouse up event listener
+    container.addEventListener('mouseup', function() {
+        isDragging = false;
+    });
+  
+    // Mouse leave event listener
+    container.addEventListener('mouseleave', function() {
+        isDragging = false;
+    });
+  
+    // Function to get the scale of the element
+    function getScale(element) {
+        const transformMatrix = window.getComputedStyle(element).transform;
+        if (transformMatrix && transformMatrix !== 'none') {
+            const matrix = transformMatrix.split(', ');
+            return parseFloat(matrix[0].split('(')[1]);
+        }
+        return 1; // Default scale if not set
+    }
+
+    function getTranslateX(element) {
+        const transformMatrix = window.getComputedStyle(element).transform;
+        if (transformMatrix && transformMatrix !== 'none') {
+            const matrix = transformMatrix.split(', ');
+            return parseFloat(matrix[4]);
+        }
+        return 0; // Default 
+    }
+
+    function getTranslateY(element) {
+        const transformMatrix = window.getComputedStyle(element).transform;
+        if (transformMatrix && transformMatrix !== 'none') {
+            const matrix = transformMatrix.split(', ');
+            return parseFloat(matrix[5]);
+        }
+        return 0; // Default 
+    }
+}

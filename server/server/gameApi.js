@@ -6,10 +6,15 @@ const router = express.Router();
 
 const {JWT_SECRET} = require('../config');
 
-const {floorVariants_full, spaceVariants_full, contentVariants_full} = require('./settings');
-let floorVariants = floorVariants_full.map(variant => Object.keys(variant)[0]);
-let spaceVariants = spaceVariants_full.map(variant => Object.keys(variant)[0]);
-let contentVariants = contentVariants_full.map(variant => Object.keys(variant)[0]);
+const {floorVariants_full, spaceVariants_full, contentVariants_full, backgroundVariants_full} = require('./settings');
+// let floorVariants = floorVariants_full.map(variant => Object.keys(variant)[0]);
+// let spaceVariants = spaceVariants_full.map(variant => Object.keys(variant)[0]);
+// let contentVariants = contentVariants_full.map(variant => Object.keys(variant)[0]);
+// let backgroundVariants = backgroundVariants_full.map(variant => Object.keys(variant)[0]);
+let floorVariants = Object.keys(floorVariants_full);
+let spaceVariants = Object.keys(spaceVariants_full);
+let contentVariants = Object.keys(contentVariants_full);
+let backgroundVariants = Object.keys(backgroundVariants_full);
 
 
 // Middleware to verify JWT token
@@ -35,7 +40,7 @@ function authenticateToken(req, res, next) {
 module.exports = function(mongooseConnection) {
     async function getSettings(req, res) {
         try {
-            res.json({ floorVariants_full, spaceVariants_full, contentVariants_full });
+            res.json({ floorVariants_full, spaceVariants_full, contentVariants_full, backgroundVariants_full });
         } catch (e) {
             res.status(500).json({ error: 'Internal server error ' + e});
         }
@@ -55,7 +60,8 @@ module.exports = function(mongooseConnection) {
         name: {type: String, unique: true, required: true},
 		settings: {
             floor: {type: String, enum: floorVariants},
-            space: {type: String, enum: spaceVariants}
+            space: {type: String, enum: spaceVariants},
+            background: {type: String, enum: backgroundVariants}
         },
         width: { type: Number, required: true },
         height: { type: Number, required: true },
@@ -115,7 +121,7 @@ module.exports = function(mongooseConnection) {
             height = parseInt(height);
 
             // if settings are not provided, use the first variants from the settings as default
-            if (!settings || !settings.floor || !settings.space) {
+            if (!settings || !settings.floor || !settings.space || !settings.background) {
                 if(!settings) {
                     settings = {};
                 }
@@ -124,6 +130,9 @@ module.exports = function(mongooseConnection) {
                 }
                 if(!settings.space) {
                     settings.space = spaceVariants[0];
+                }
+                if(!settings.background) {
+                    settings.background = backgroundVariants[0];
                 }
             }
 
