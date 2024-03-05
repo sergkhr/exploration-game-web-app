@@ -133,8 +133,6 @@ body {
   background-position: center;
 }
 #container #map_container {
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -145,10 +143,56 @@ body {
 #container #map_container::after {
   content: "";
   position: absolute;
-  width: calc(100% - var(--hexagon-size));
-  height: calc(100% - var(--hexagon-side-size));
+  top: calc(var(--hexagon-side-size) / 2);
+  left: calc(var(--hexagon-size) / 2);
+  width: calc(100% - var(--hexagon-size) - 200px);
+  height: calc(100% - var(--hexagon-side-size) - 280px);
   backdrop-filter: blur(3px);
   z-index: -10;
+}
+#container #map_container #content_picker {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  transition: all var(--standart-animation-time) ease;
+  z-index: 100;
+  transform-origin: top left;
+  box-sizing: border-box;
+  background-color: rgb(var(--white-color));
+  border: 1px solid rgb(var(--black-color));
+  border-radius: 10px;
+}
+#container #map_container #content_picker.hidden {
+  display: none;
+}
+#container #map_container #content_picker.fading {
+  opacity: 0.5;
+}
+#container #map_container #content_picker .content_element {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  border-bottom: 1px solid rgba(var(--black-color), 0.5);
+}
+#container #map_container #content_picker .content_element:last-child {
+  border-bottom: none;
+}
+#container #map_container #content_picker .content_element .content_icon {
+  height: 100%;
+  width: auto;
+  border-right: 1px solid rgba(var(--black-color), 0.5);
+}
+#container #map_container #content_picker .content_element p {
+  flex-grow: 1;
+  margin: 0;
+  margin-left: 10px;
+  padding: 0;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: rgba(var(--black-color), 1);
 }
 #container .hex {
   width: var(--hexagon-size);
@@ -164,6 +208,7 @@ body {
   zoom: 1;
   border-left: 1px solid rgba(var(--black-color), 1);
   border-right: 1px solid rgba(var(--black-color), 1);
+  transition: filter var(--standart-animation-time) ease;
 }
 #container .hex.space {
   background-color: rgba(var(--space-color), 1);
@@ -223,4 +268,8 @@ body {
 #container .hex .corner-2:before {
   transform: rotate(60deg) translate(-48px, -11px);
   bottom: 0;
+}
+#container .hex:hover {
+  filter: brightness(0.9) contrast(1.1) hue-rotate(75deg);
+  cursor: pointer;
 }

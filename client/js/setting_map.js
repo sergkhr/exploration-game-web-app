@@ -66,6 +66,8 @@ $(document).ready(function() {
             spaceVariants_full = data.spaceVariants_full;
             contentVariants_full = data.contentVariants_full;
             backgroundVariants_full = data.backgroundVariants_full;
+
+            populateContentPicker();
         }).catch((error) => {
             console.log(error);
         });
@@ -86,6 +88,21 @@ $(document).ready(function() {
 
 
 
+function populateContentPicker(){
+    let contentPicker = $("#content_picker");
+    contentPicker.empty();
+    let contentVariantsKeys = Object.keys(contentVariants_full);
+    contentVariantsKeys.forEach((content) => {
+        let content_element = $("<div class=\"content_element\" data-content=\"" + content + "\"></div>");
+        let src_name = contentVariants_full[content];
+        let content_img = $("<img src=\"../src/icons/" + src_name + "\" class=\"content_icon\" alt=\"er\">");
+        let content_name = $("<p class=\"content_name\">" + content + "</p>");
+        content_element.append(content_img);
+        content_element.append(content_name);
+        
+        contentPicker.append(content_element);
+    });
+}
 
 function populateMap(map){
     let mapName = map.name;
@@ -111,9 +128,9 @@ function populateMap(map){
     let hex_gap = parseFloat($('html').css('--hexagon-gap'));
 
     let container = map_container;
-    container.empty();
-    let calculated_cont_width = (column_number + 0.5) * hex_horizontal_width + (column_number - 1 + 0.5) * hex_gap   + 2;
-    let calculated_cont_height = (row_number * 1.5 + 0.5) * hex_vertical_width + (row_number - 1) * hex_gap * Math.sin(Math.PI / 3)   + 1;
+    container.find('.hex').remove();
+    let calculated_cont_width = (column_number + 0.5) * hex_horizontal_width + (column_number - 1 + 0.5) * hex_gap   + 5 + $("#content_picker").width();
+    let calculated_cont_height = (row_number * 1.5 + 0.5) * hex_vertical_width + (row_number - 1) * hex_gap * Math.sin(Math.PI / 3)   + 4 + $("#content_picker").height();
     container.css('min-width', calculated_cont_width + 'px');
     container.css('min-height', calculated_cont_height + 'px');
 
@@ -132,9 +149,10 @@ function populateMap(map){
             });
             let content_html = hex_content.join('');
 
-            createHexagon(content_html, x, y, container, cell.isFloor, cell.isClosed);
+            createHexagon(content_html, x, y, i, j, container, cell.isFloor, cell.isClosed);
         });
     });
+    addDblClickEventToHexagons();
 }
 
 /**
@@ -151,7 +169,7 @@ function addContentToHexagon(content, hexagon) {
 
 
 outer_container.on('wheel', function(event){ //resize the map on mouse wheel
-    debounce(resizeMap(event, map_container, outer_container), 300)
+    debounce(resizeMap(event, map_container, outer_container, $("#content_picker")), 300)
 });
 
 handleDrag(map_container[0], outer_container[0]);
@@ -160,3 +178,40 @@ $("#back-to-main-page").click(function() {
     window.location.href = '/';
 });
 
+function addDblClickEventToHexagons(){
+    $(".hex").on("dblclick", function() {
+        let hex = $(this);
+        let i = hex.data("row");
+        let j = hex.data("column");
+        let x = parseFloat(hex.css("left")) + hex.width();
+        let y = parseFloat(hex.css("top")) - 0.5* hex.height();
+        
+        displayContentPicker(i, j, x, y);
+    });
+}
+
+function displayContentPicker(hex_i, hex_j, x, y){
+    let contentPicker = $("#content_picker");
+    contentPicker.data("hex_i", hex_i);
+    contentPicker.data("hex_j", hex_j);
+    contentPicker.css("left", x);
+    contentPicker.css("top", y);
+    
+    contentPicker.removeClass("hidden");
+
+    clearTimeout(contentPicker.data('timeoutId'));
+    let timeoutId = setTimeout(() => {
+        contentPicker.addClass("hidden");
+    }, 2000);
+    contentPicker.data('timeoutId', timeoutId);
+}
+$("#content_picker").hover(function(){
+    clearTimeout($(this).data('timeoutId'));
+    $(this).removeClass("fading");
+}, function(){
+    $(this).addClass("fading");
+    let timeoutId = setTimeout(() => {
+        $(this).addClass("hidden");
+    }, 1000);
+    $(this).data('timeoutId', timeoutId);
+});

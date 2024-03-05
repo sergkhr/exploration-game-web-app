@@ -37,8 +37,8 @@ function resizeContainerForContent(container, childrenSelector=null) {
  * @param {jquery object} container the container that will hold the map
  * @param {boolean} isFloor if the hexagon is a floor or a space
  */
-function createHexagon(content, x, y, container, isFloor=true, isClosed=true){
-    let hexagon = $('<div class="hex"></div>');
+function createHexagon(content, x, y, i, j, container, isFloor=true, isClosed=true){
+    let hexagon = $('<div class="hex" data-row="' + i + '" data-column="' + j + '"></div>');
 
     // Create the inner div and add the content
     let $inner = $('<div class="inner"></div>').html(content);
@@ -86,7 +86,7 @@ function limitTranslationY(translateY, scale, map_container, outer_container, ga
     return Math.min(TranslateY_limit, Math.max(-TranslateY_limit, translateY));
 }
 
-function resizeMap(event, map_container, outer_container){
+function resizeMap(event, map_container, outer_container, non_resized_elements=null){
     // Get the current scale of the inner div
     let currentTransform = map_container.css('transform');
     let currentScale = 1;
@@ -121,6 +121,12 @@ function resizeMap(event, map_container, outer_container){
 
     // Apply the new scale to the inner div
     map_container.css('transform', `translate(${newTranslateX}px, ${newTranslateY}px) scale(${newScale})`);
+    
+    if(non_resized_elements){
+        non_resized_elements.each(function(){
+            $(this).css('transform', `scale(${1/newScale})`);
+        });
+    }
 
     event.preventDefault();
 }
