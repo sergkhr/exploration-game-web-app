@@ -63,13 +63,25 @@ function userLogin(playerName, playerPassword) {
             reject("User name or password is empty");
             return;
         }
-        $.post("/api/login", { name: playerName, password: playerPassword }, function (data) {
-            if (data.error) {
-                reject(data.error);
-                return;
+        $.ajax({
+            url: "/api/login",
+            type: "POST",
+            data: { name: playerName, password: playerPassword },
+            success: function (data) {
+                if (data.error) {
+                    reject(data.error);
+                    return;
+                }
+                sessionStorage.setItem("token", data.token);
+                resolve();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                if (xhr.status === 401) {
+                    reject("Incorrect password or username");
+                } else {
+                    reject("Error during login: " + textStatus);
+                }
             }
-            sessionStorage.setItem("token", data.token);
-            resolve();
         });
     });
 }

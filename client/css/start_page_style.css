@@ -214,6 +214,9 @@ body {
 #container .buttons-place .buttons-block .login-form .horizontal-input .for-input {
   width: calc(50% - var(--standart-gap));
 }
+#container .buttons-place .buttons-block .login-form button {
+  margin-top: auto;
+}
 #container .buttons-place .buttons-block .login-form.players-settings {
   width: calc(50% - var(--standart-gap) * 2);
 }

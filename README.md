@@ -12,3 +12,7 @@
 # Functional logic
 - updating the map is mostly on the client side\
     the server is only getting update request with whole map, when client saves the changes
+
+# How to turn on/update
+- update local files
+- run in root directory (where docker-compose.yml is located) "docker-compose up --build", for no logs: "docker-compose up --build -d"
