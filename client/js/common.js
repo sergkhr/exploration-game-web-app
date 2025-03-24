@@ -133,7 +133,7 @@ function resizeMap(event, map_container, outer_container, non_resized_elements=n
 
 
 
-// Function to handle right mouse button drag
+// Function to handle map dragging
 function handleDrag(element, container) {
     let isDragging = false;
     let startX, startY, initialX, initialY;
@@ -145,7 +145,7 @@ function handleDrag(element, container) {
   
     // Mouse down event listener
     container.addEventListener('mousedown', function(event) {
-        if (event.button === 2) { // Check if right mouse button is clicked
+        if (event.button === 1) { // Check if middle mouse button is clicked
             isDragging = true;
             startX = event.clientX;
             startY = event.clientY;

@@ -77,6 +77,8 @@ $(document).ready(function() {
         getMapByName(mapName).then((map) => {
             work_map = map;
             populateMap(work_map);
+            addLeftClickEventToHexagons();
+            addClickEventToContentPicker();
         }).catch((error) => {
             console.log(error);
         });
@@ -152,7 +154,7 @@ function populateMap(map){
             createHexagon(content_html, x, y, i, j, container, cell.isFloor, cell.isClosed);
         });
     });
-    addDblClickEventToHexagons();
+    
 }
 
 /**
@@ -178,8 +180,9 @@ $("#back-to-main-page").click(function() {
     window.location.href = '/';
 });
 
-function addDblClickEventToHexagons(){
-    $(".hex").on("dblclick", function() {
+function addLeftClickEventToHexagons(){
+    $(".hex").on("click", function(event) {
+        if(event.button !== 0) return;
         let hex = $(this);
         let i = hex.data("row");
         let j = hex.data("column");
@@ -189,6 +192,7 @@ function addDblClickEventToHexagons(){
         displayContentPicker(i, j, x, y);
     });
 }
+
 
 function displayContentPicker(hex_i, hex_j, x, y){
     let contentPicker = $("#content_picker");
@@ -205,6 +209,7 @@ function displayContentPicker(hex_i, hex_j, x, y){
     }, 2000);
     contentPicker.data('timeoutId', timeoutId);
 }
+
 $("#content_picker").hover(function(){
     clearTimeout($(this).data('timeoutId'));
     $(this).removeClass("fading");
@@ -215,3 +220,28 @@ $("#content_picker").hover(function(){
     }, 1000);
     $(this).data('timeoutId', timeoutId);
 });
+
+
+function addClickEventToContentPicker() {
+    // Навешиваем обработчик клика на все элементы внутри #content_picker с классом .content_element
+    $("#content_picker .content_element").on("click", function() {
+        // Получаем выбранный элемент: берем первого потомка (например, <img>)
+        let $selectedContent = $(this).children().first();
+
+        // Получаем данные шестиугольника, в который нужно добавить контент
+        let $contentPicker = $("#content_picker");
+        let hexRow = $contentPicker.data("hex_i");
+        let hexColumn = $contentPicker.data("hex_j");
+
+        // Находим нужный шестиугольник по данным row и column
+        let $hexagon = $(".hex").filter(function() {
+            return $(this).data("row") === hexRow && $(this).data("column") === hexColumn;
+        }).first();
+
+        // Если шестиугольник найден, добавляем в него выбранный контент.
+        // Используем .clone(), чтобы не перемещать оригинальный элемент из content_picker.
+        if ($hexagon.length > 0) {
+            addContentToHexagon($selectedContent.clone(), $hexagon);
+        }
+    });
+}
