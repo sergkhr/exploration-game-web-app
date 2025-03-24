@@ -176,6 +176,8 @@ body {
   width: 100%;
   height: 40px;
   border-bottom: 1px solid rgba(var(--black-color), 0.5);
+  user-select: none;
+  transition: backdrop-filter var(--standart-animation-time) ease;
 }
 #container #map_container #content_picker .content_element:last-child {
   border-bottom: none;
@@ -193,6 +195,14 @@ body {
   font-size: 1.5em;
   font-weight: 700;
   color: rgba(var(--black-color), 1);
+}
+#container #map_container #content_picker .content_element:hover {
+  backdrop-filter: brightness(0.8) contrast(1.1);
+  cursor: pointer;
+}
+#container #map_container #content_picker .content_element:active {
+  transition: backdrop-filter 0.1s ease;
+  backdrop-filter: brightness(0.6);
 }
 #container .hex {
   width: var(--hexagon-size);
@@ -218,6 +228,7 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(35px, 1fr));
   width: 100%;
   height: 100%;
+  user-select: none;
 }
 #container .hex .inner .content_icon {
   width: -webkit-fill-available;
