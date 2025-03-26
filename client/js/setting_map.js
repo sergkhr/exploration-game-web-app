@@ -165,8 +165,14 @@ function populateMap(map){
  */
 function addContentToHexagon(content, hexagon) {
     let $inner = hexagon.find('.inner');
-    $inner.append(content);
-    hexagon.append($inner);
+    if ($inner.children().length < 8) {
+        $inner.append(content);
+        addSelfDeletion(content);
+        
+        hexagon.append($inner);
+    } else {
+        console.log("Hexagon already contains maximum content.");
+    }
 }
 
 
@@ -243,5 +249,18 @@ function addClickEventToContentPicker() {
         if ($hexagon.length > 0) {
             addContentToHexagon($selectedContent.clone(), $hexagon);
         }
+    });
+}
+
+
+/**
+ * attaches a deletion function to the element
+ * 
+ * @param {jquery object} element to which a deletion function will be attached
+ */
+function addSelfDeletion($content) {
+    $content.on('contextmenu', function(e) {
+        e.preventDefault();
+        $(this).remove();
     });
 }

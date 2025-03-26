@@ -80,6 +80,14 @@ body {
   background-color: rgba(var(--primary-very-light-color), 0.8);
   box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 }
+#top-button-block .controls {
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 5px;
+}
+#top-button-block .controls b {
+  margin: 0 5px;
+}
 #top-button-block #save-button {
   box-sizing: border-box;
   width: 200px;
@@ -229,14 +237,22 @@ body {
   width: 100%;
   height: 100%;
   user-select: none;
+  box-sizing: border-box;
+  padding: 0 5px;
 }
 #container .hex .inner .content_icon {
   width: -webkit-fill-available;
   max-width: var(--hexagon-side-size);
   max-height: var(--hexagon-side-size);
+  background-color: rgba(240, 248, 255, 0);
+  border-radius: 7px;
+  transition: background-color var(--standart-animation-time) ease;
 }
 #container .hex .inner .content_icon.hidden {
   opacity: 0.5;
+}
+#container .hex .inner .content_icon:hover {
+  background-color: rgba(240, 248, 255, 0.324);
 }
 #container .hex .corner-1,
 #container .hex .corner-2 {
@@ -281,6 +297,6 @@ body {
   bottom: 0;
 }
 #container .hex:hover {
-  filter: brightness(0.9) contrast(1.1) hue-rotate(75deg);
+  filter: brightness(0.9) contrast(1.1);
   cursor: pointer;
 }
