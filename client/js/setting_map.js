@@ -8,6 +8,14 @@ let outer_container = $("#container");
 
 let work_map;
 
+let is_painting_mode = false;
+let painting_cell_type = "floor";
+
+
+////////////////////////////////////////////////////////////////////
+/////////////////API FUNCTIONS//////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
 function checkIfMasterUser(){
     return new Promise((resolve, reject) => {
         let token = sessionStorage.getItem('token');
@@ -58,6 +66,12 @@ function getMapByName(mapName) {
     });
 }
 
+
+
+////////////////////////////////////////////////////////////////////
+/////////////////STARTUP ROUTINE////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
 $(document).ready(function() {
     checkIfMasterUser().then(() => {
         $("#loading_curtain").addClass("hidden");
@@ -66,6 +80,9 @@ $(document).ready(function() {
             spaceVariants_full = data.spaceVariants_full;
             contentVariants_full = data.contentVariants_full;
             backgroundVariants_full = data.backgroundVariants_full;
+
+            addPaintingModeCheckboxChange();
+            addCellTypeToPaintChange();
 
             populateContentPicker();
         }).catch((error) => {
@@ -87,7 +104,6 @@ $(document).ready(function() {
         window.location.href = '/';
     });
 });
-
 
 
 function populateContentPicker(){
@@ -157,24 +173,15 @@ function populateMap(map){
     
 }
 
-/**
- * Add content to a hexagon
- * 
- * @param {jquery object} content all DOM elemnts to put inside the hexagon
- * @param {jquery object} hexagon the hexagon to add the content to
- */
-function addContentToHexagon(content, hexagon) {
-    let $inner = hexagon.find('.inner');
-    if ($inner.children().length < 8) {
-        $inner.append(content);
-        addSelfDeletion(content);
-        
-        hexagon.append($inner);
-    } else {
-        console.log("Hexagon already contains maximum content.");
-    }
-}
 
+///////////////////////////////////////////////////////////////////////////
+////////////////////BIG CONTROLS///////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+
+$("#back-to-main-page").click(function() {
+    window.location.href = '/';
+});
 
 outer_container.on('wheel', function(event){ //resize the map on mouse wheel
     debounce(resizeMap(event, map_container, outer_container, $("#content_picker")), 300)
@@ -182,13 +189,19 @@ outer_container.on('wheel', function(event){ //resize the map on mouse wheel
 
 handleDrag(map_container[0], outer_container[0]);
 
-$("#back-to-main-page").click(function() {
-    window.location.href = '/';
-});
+///////////////////////////////////////////////////////////////////////////
+////////////////////HEXAGON CONTROLS///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 
 function addLeftClickEventToHexagons(){
     $(".hex").on("click", function(event) {
         if(event.button !== 0) return;
+
+        if(is_painting_mode){
+            paintHexagon($(this));
+            return;
+        }
+        
         let hex = $(this);
         let i = hex.data("row");
         let j = hex.data("column");
@@ -199,6 +212,21 @@ function addLeftClickEventToHexagons(){
     });
 }
 
+/**
+ * attaches a deletion function to the element
+ * 
+ * @param {jquery object} element to which a deletion function will be attached
+ */
+function addSelfDeletion($content) {
+    $content.on('contextmenu', function(e) {
+        e.preventDefault();
+        $(this).remove();
+    });
+}
+
+////////////////////////////////////////////////////////////////////
+/////////////////ADDING CONTENT AND CONTENT PICKER///////////////////
+////////////////////////////////////////////////////////////////////
 
 function displayContentPicker(hex_i, hex_j, x, y){
     let contentPicker = $("#content_picker");
@@ -254,13 +282,46 @@ function addClickEventToContentPicker() {
 
 
 /**
- * attaches a deletion function to the element
+ * Add content to a hexagon
  * 
- * @param {jquery object} element to which a deletion function will be attached
+ * @param {jquery object} content all DOM elemnts to put inside the hexagon
+ * @param {jquery object} hexagon the hexagon to add the content to
  */
-function addSelfDeletion($content) {
-    $content.on('contextmenu', function(e) {
-        e.preventDefault();
-        $(this).remove();
+function addContentToHexagon(content, hexagon) {
+    let $inner = hexagon.find('.inner');
+    if ($inner.children().length < 8) {
+        $inner.append(content);
+        addSelfDeletion(content);
+        
+        hexagon.append($inner);
+    } else {
+        console.log("Hexagon already contains maximum content.");
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+/////////////////PAINTING CELL TYPES CONTROLS///////////////////////
+////////////////////////////////////////////////////////////////////
+
+function addPaintingModeCheckboxChange(){
+    $("#painting-mode-checkbox").on("change", function() {
+        is_painting_mode = $(this).prop("checked");
+        console.log("Painting mode:", is_painting_mode);
     });
 }
+
+function addCellTypeToPaintChange(){
+    $("input[name='cell-type']").on("change", function() {
+        painting_cell_type = $(this).val();
+        console.log("Painting cell type:", painting_cell_type);
+    });
+}
+
+function paintHexagon(hexagon){
+    if (painting_cell_type === "space") {
+        hexagon.addClass("space");
+    } else if (painting_cell_type === "floor") {
+        hexagon.removeClass("space");
+    }
+}
+

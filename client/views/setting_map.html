@@ -13,13 +13,35 @@
 
 	<div id="top-button-block">
 		<button id="back-to-main-page">На главную</button>
+
 		<div class="controls">
 			<b>LMB - add content;</b>
 			<b>MMB - move map;</b>
 			<b>RMB - delete content;</b>
 		</div>
+
+		<div class="painting-controls">
+			<label class="for-painting-mode">
+				<input type="checkbox" id="painting-mode-checkbox">
+				<span>painting mode; LMB</span>
+			</label>
+
+			<fieldset class="cell-type-picker">
+				<label class="for-cell-type">
+					<input type="radio" name="cell-type" value="floor" checked>
+					<span>floor</span>
+				</label>
+				<label class="for-cell-type">
+					<input type="radio" name="cell-type" value="space">
+					<span>space</span>
+				</label>
+			</fieldset>
+		</div>
+
 		<button id="save-button">Сохранить</button>
 	</div>
+
+
 
 	<div id="container">
 		<div id="map_container">
