@@ -158,7 +158,7 @@ body {
   backdrop-filter: blur(3px);
   z-index: -10;
 }
-#container #map_container #content_picker {
+#container #map_container .hex_menu {
   position: absolute;
   display: flex;
   flex-direction: column;
@@ -171,13 +171,13 @@ body {
   border: 1px solid rgb(var(--black-color));
   border-radius: 10px;
 }
-#container #map_container #content_picker.hidden {
+#container #map_container .hex_menu.hidden {
   display: none;
 }
-#container #map_container #content_picker.fading {
+#container #map_container .hex_menu.fading {
   opacity: 0.5;
 }
-#container #map_container #content_picker .content_element {
+#container #map_container .hex_menu .content_element {
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -187,15 +187,15 @@ body {
   user-select: none;
   transition: backdrop-filter var(--standart-animation-time) ease;
 }
-#container #map_container #content_picker .content_element:last-child {
+#container #map_container .hex_menu .content_element:last-child {
   border-bottom: none;
 }
-#container #map_container #content_picker .content_element .content_icon {
+#container #map_container .hex_menu .content_element .content_icon {
   height: 100%;
   width: auto;
   border-right: 1px solid rgba(var(--black-color), 0.5);
 }
-#container #map_container #content_picker .content_element p {
+#container #map_container .hex_menu .content_element p {
   flex-grow: 1;
   margin: 0;
   margin-left: 10px;
@@ -204,11 +204,11 @@ body {
   font-weight: 700;
   color: rgba(var(--black-color), 1);
 }
-#container #map_container #content_picker .content_element:hover {
+#container #map_container .hex_menu .content_element:hover {
   backdrop-filter: brightness(0.8) contrast(1.1);
   cursor: pointer;
 }
-#container #map_container #content_picker .content_element:active {
+#container #map_container .hex_menu .content_element:active {
   transition: backdrop-filter 0.1s ease;
   backdrop-filter: brightness(0.6);
 }
@@ -246,10 +246,11 @@ body {
   max-height: var(--hexagon-side-size);
   background-color: rgba(240, 248, 255, 0);
   border-radius: 7px;
+  position: relative;
   transition: background-color var(--standart-animation-time) ease;
 }
 #container .hex .inner .content_icon.hidden {
-  opacity: 0.5;
+  opacity: 0.3;
 }
 #container .hex .inner .content_icon:hover {
   background-color: rgba(240, 248, 255, 0.324);

@@ -156,7 +156,7 @@ body{
             z-index: -10;
         }
 
-        #content_picker{
+        .hex_menu{
             position: absolute;
             display: flex;
             flex-direction: column;
@@ -214,6 +214,7 @@ body{
                 }
             }
         }
+
     }
 
     //______________________________________________________________________________________
@@ -256,9 +257,10 @@ body{
                 max-height: var(--hexagon-side-size);
                 background-color: rgba(240, 248, 255, 0);
                 border-radius: 7px;
+                position: relative;
 
                 &.hidden{
-                    opacity: 0.5;
+                    opacity: 0.3;
                 }
 
                 transition: background-color var(--standart-animation-time) ease;

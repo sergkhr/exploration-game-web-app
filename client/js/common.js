@@ -86,6 +86,14 @@ function limitTranslationY(translateY, scale, map_container, outer_container, ga
     return Math.min(TranslateY_limit, Math.max(-TranslateY_limit, translateY));
 }
 
+/**
+ * function that controlls the resizing of map and everything inside of it
+ * 
+ * @param {Event} event object
+ * @param {jquery object} map_containter
+ * @param {jquery object} outer_container
+ * @param {jquery objects list} non_resized_elements - elements to be resized with the map
+ */
 function resizeMap(event, map_container, outer_container, non_resized_elements=null){
     // Get the current scale of the inner div
     let currentTransform = map_container.css('transform');

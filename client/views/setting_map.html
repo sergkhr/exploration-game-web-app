@@ -17,7 +17,7 @@
 		<div class="controls">
 			<b>LMB - add content;</b>
 			<b>MMB - move map;</b>
-			<b>RMB - delete content;</b>
+			<b>RMB - modify content;</b>
 		</div>
 
 		<div class="painting-controls">
@@ -45,12 +45,24 @@
 
 	<div id="container">
 		<div id="map_container">
-			<div id="content_picker" class="fading hidden">
+			<div id="content_picker" class="hex_menu fading hidden">
 				<div class="content_element" data-content="content_name">
 					<img src="../src/icons/content_src" class="content_icon" alt="er">
 					<p class="content_name">content_name</p>
 				</div>
 			</div>
+
+			<div id="content_modifier" class="hex_menu fading hidden">
+				<div class="content_element" id="change_content_visibility">
+					<img src="../src/tech_icons/hidden.svg" class="content_icon" alt="er">
+					<p class="content_name">change visibility</p>
+				</div>
+				<div class="content_element" id="delete_content">
+					<img src="../src/tech_icons/delete.svg" class="content_icon" alt="er">
+					<p class="content_name">delete</p>
+				</div>
+			</div>
+
 
 			<div class="hex">
 				<div class="inner">

@@ -11,6 +11,8 @@ let work_map;
 let is_painting_mode = false;
 let painting_cell_type = "floor";
 
+let $work_content;
+
 
 ////////////////////////////////////////////////////////////////////
 /////////////////API FUNCTIONS//////////////////////////////////////
@@ -96,6 +98,7 @@ $(document).ready(function() {
             populateMap(work_map);
             addLeftClickEventToHexagons();
             addClickEventToContentPicker();
+            addClickEventToModifyingMenu()
         }).catch((error) => {
             console.log(error);
         });
@@ -184,7 +187,7 @@ $("#back-to-main-page").click(function() {
 });
 
 outer_container.on('wheel', function(event){ //resize the map on mouse wheel
-    debounce(resizeMap(event, map_container, outer_container, $("#content_picker")), 300)
+    debounce(resizeMap(event, map_container, outer_container, $(".hex_menu")), 300)
 });
 
 handleDrag(map_container[0], outer_container[0]);
@@ -217,10 +220,10 @@ function addLeftClickEventToHexagons(){
  * 
  * @param {jquery object} element to which a deletion function will be attached
  */
-function addSelfDeletion($content) {
+function addModifyingMenu($content) {
     $content.on('contextmenu', function(e) {
         e.preventDefault();
-        $(this).remove();
+        displayModifyingMenu($content)
     });
 }
 
@@ -291,13 +294,63 @@ function addContentToHexagon(content, hexagon) {
     let $inner = hexagon.find('.inner');
     if ($inner.children().length < 8) {
         $inner.append(content);
-        addSelfDeletion(content);
+        addModifyingMenu(content);
         
         hexagon.append($inner);
     } else {
         console.log("Hexagon already contains maximum content.");
     }
 }
+
+
+////////////////////////////////////////////////////////////////////
+/////////////////MODIFYING CONTENT//////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+function displayModifyingMenu($content){
+    let modifyingMenu = $("#content_modifier");
+    $work_content = $content;
+    let hex = $content.parent().parent();
+    
+    let x = parseFloat(hex.css("left")) + $content.position().left + $content.width();
+    let y = parseFloat(hex.css("top")) + $content.position().top;
+    
+    modifyingMenu.css("left", x);
+    modifyingMenu.css("top", y);
+    
+    modifyingMenu.removeClass("hidden");
+
+    clearTimeout(modifyingMenu.data('timeoutId'));
+    let timeoutId = setTimeout(() => {
+        modifyingMenu.addClass("hidden");
+    }, 2000);
+    modifyingMenu.data('timeoutId', timeoutId);
+}
+
+$("#content_modifier").hover(function(){
+    clearTimeout($(this).data('timeoutId'));
+    $(this).removeClass("fading");
+}, function(){
+    $(this).addClass("fading");
+    let timeoutId = setTimeout(() => {
+        $(this).addClass("hidden");
+    }, 1000);
+    $(this).data('timeoutId', timeoutId);
+});
+
+function addClickEventToModifyingMenu() {
+    $("#change_content_visibility").on("click", function() {
+        $work_content.toggleClass("hidden");
+        $("#content_modifier").addClass("hidden");
+    });
+
+    $("#delete_content").on("click", function(){
+        $work_content.remove();
+        $("#content_modifier").addClass("hidden");
+    });
+}
+
+
 
 ////////////////////////////////////////////////////////////////////
 /////////////////PAINTING CELL TYPES CONTROLS///////////////////////
