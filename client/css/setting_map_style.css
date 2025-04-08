@@ -4,7 +4,7 @@
   --hexagon-gap: 5px;
   --floor-color: 0, 153, 0;
   --space-color: 0, 0, 153;
-  --map-background-image: url('../src/backgrounds/nope.jpg');
+  --map-background-image: url('../src/backgrounds/none.jpg');
 }
 body {
   display: flex;
@@ -87,6 +87,9 @@ body {
 }
 #top-button-block .controls b {
   margin: 0 5px;
+}
+#top-button-block .color-picker label span {
+  display: block;
 }
 #top-button-block #save-button {
   box-sizing: border-box;

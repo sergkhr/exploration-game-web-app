@@ -16,6 +16,7 @@ let spaceVariants = Object.keys(spaceVariants_full);
 let contentVariants = Object.keys(contentVariants_full);
 let backgroundVariants = Object.keys(backgroundVariants_full);
 
+console.log("content variants:\n" + contentVariants);
 
 // Middleware to verify JWT token
 function authenticateToken(req, res, next) {
@@ -47,14 +48,14 @@ module.exports = function(mongooseConnection) {
     }
 
     //maps api
-    const contentScheme = new mongoose.Schema({
+    const contentSchema = new mongoose.Schema({
         type: {type: String, enum: contentVariants, required: true},
         isHidden: {type: Boolean, required: true}
     });
     const cellSchema = new mongoose.Schema({
         isClosed: { type: Boolean, required: true },
         isFloor: { type: Boolean, required: true },
-        content: [contentScheme]
+        content: [contentSchema]
     });
     const mapSchema = new mongoose.Schema({
         name: {type: String, unique: true, required: true},
@@ -173,7 +174,14 @@ module.exports = function(mongooseConnection) {
     
             const name = req.query.name; // Get the map name from the query params
             const { settings, width, height, cells } = req.body; // Get updated map data from the request body
-    
+
+            //debugging
+            // cells.forEach(row => {
+            //     row.forEach(cell => {
+            //         console.log("Cell content:", cell.content);
+            //     });
+            // });
+            
             // Find the map by name
             let map = await GameMap.findOne({ name });
             if (!map) {

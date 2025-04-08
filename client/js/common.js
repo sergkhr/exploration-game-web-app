@@ -36,12 +36,13 @@ function resizeContainerForContent(container, childrenSelector=null) {
  * @param {int} y vertical position of hexagon left top corner from top
  * @param {jquery object} container the container that will hold the map
  * @param {boolean} isFloor if the hexagon is a floor or a space
+ * @param {boolean} isClosed if the hexagon is closed by the fog of war, meant for the game, not for creation
  */
 function createHexagon(content, x, y, i, j, container, isFloor=true, isClosed=true){
     let hexagon = $('<div class="hex" data-row="' + i + '" data-column="' + j + '"></div>');
 
     // Create the inner div and add the content
-    let $inner = $('<div class="inner"></div>').html(content);
+    let $inner = $('<div class="inner"></div>').append(content);
 
     // Create the corner divs
     let $corner1 = $('<div class="corner-1"></div>');

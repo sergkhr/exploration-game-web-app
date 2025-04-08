@@ -6,6 +6,7 @@ const floorVariants = {
 
 const spaceVariants = {
     "blue": "26, 115, 217", //water, sky
+    "black": "12, 12, 12", //walls in caves
 }
 
 

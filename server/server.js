@@ -21,8 +21,10 @@ mongoose.connect('mongodb://mongo:27017/exploration_game', {
 
 app.use(express.static('client'));
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+
 
 app.use('/', navigation);
 app.use('/api', userApi(mongoose.connection));
