@@ -119,7 +119,9 @@ $("#master-login-button").click(function() {
 });
 
 $("#master-join-game-button").click(function() {
-    //TODO: load active games list
+    getGames().then(games => {
+        populateSelectionList($("#game-name-selection"), games);
+    });
     showNavigation(6);
 });
 
@@ -387,3 +389,29 @@ $("#configure-map-button").click(function() {
     }
     goToConfigureMap(mapName);
 });
+
+
+//___________________________________________________________________________________________
+// work with games
+
+function getGames() {
+    return new Promise((resolve, reject) => {
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            url: "/api/games/games",
+            type: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}

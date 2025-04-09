@@ -174,13 +174,6 @@ module.exports = function(mongooseConnection) {
     
             const name = req.query.name; // Get the map name from the query params
             const { settings, width, height, cells } = req.body; // Get updated map data from the request body
-
-            //debugging
-            // cells.forEach(row => {
-            //     row.forEach(cell => {
-            //         console.log("Cell content:", cell.content);
-            //     });
-            // });
             
             // Find the map by name
             let map = await GameMap.findOne({ name });
@@ -251,6 +244,22 @@ module.exports = function(mongooseConnection) {
 
     const Game = mongooseConnection.model('Game', gameSchema);
 
+
+	async function getGamesNames(req, res) {
+		try {
+			// Check if the user making the request is a master or player
+			if (req.user.role !== 'master' && req.user.role !== 'player') {
+				return res.status(403).json({ error: 'Only authorized users can fetch games' });
+			}
+
+			const games = await Game.find({}, 'name');
+            const gameNames = games.map(game => game.name);
+            res.json(gameNames);
+		} catch (e) {
+			res.status(500).json({ error: 'Internal server error ' + e});
+		}
+	}
+
 	//________________________________________________________________________________________________
 	// api endpoint
 	// we pass functions themselves as parameters to the router
@@ -261,6 +270,7 @@ module.exports = function(mongooseConnection) {
     router.put('/maps', authenticateToken, updateGameMap); // ?name=mapName
     router.delete('/maps', authenticateToken, deleteGameMap); // ?name=mapName
 
+    router.get('/games', authenticateToken, getGamesNames);
 
 	return router;
 };
