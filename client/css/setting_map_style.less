@@ -51,7 +51,8 @@ body{
 
 @button-style:{
     box-sizing: border-box;
-    width: 200px;
+    min-width: 200px;
+    width: fit-content;
     padding: var(--standart-gap);
     background-color: rgba(var(--primary-light-color), 0.8);
     border: none;
@@ -85,8 +86,6 @@ body{
     gap: var(--standart-gap);
     button{
         margin-top: -10px;
-    }
-    #back-to-main-page{
         @button-style();
     }
     .controls{
@@ -106,7 +105,6 @@ body{
 
 
     #save-button{
-        @button-style();
         &::after{
             content: "";
             position: absolute;
@@ -152,14 +150,14 @@ body{
         align-items: center;
         position: relative;
         transform: scale(1);
-        contain: strict;
+        // contain: strict;
         &::after{
             content: "";
             position: absolute;
             top: calc(var(--hexagon-side-size) / 2);
             left: calc(var(--hexagon-size) / 2);
-            width: calc(100% - var(--hexagon-size) - 200px); //additional are for the content picker
-            height: calc(100% - var(--hexagon-side-size) - 280px);
+            width: calc(100% - var(--hexagon-size)); //additional are for the content picker
+            height: calc(100% - var(--hexagon-side-size));
             backdrop-filter: blur(3px);
             z-index: -10;
         }
@@ -235,7 +233,7 @@ body{
     .hex {
         width: var(--hexagon-size);
         height: var(--hexagon-side-size);
-        opacity: 0.8;
+        opacity: 0.95;
         // box-sizing: border-box;
         background-color: rgba(var(--floor-color), 1);
         &.space{
@@ -320,8 +318,9 @@ body{
         }
 
 
-        transition: filter var(--standart-animation-time) ease;
+        transition: filter var(--slow-animation-time) ease;
         &:hover{
+            transition: filter var(--quick-animation-time) ease;
             filter: brightness(0.9) contrast(1.1);
             cursor: pointer;
         }

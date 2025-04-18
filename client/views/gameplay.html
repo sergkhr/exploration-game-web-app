@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../css/common_style.css">
 	<link rel="stylesheet" href="../css/setting_map_style.css">
+    <link rel="stylesheet" href="../css/game_style.css">
 
 </head>
 <body>
@@ -19,12 +20,12 @@
 		</div>
 
 		<div class="controls">
-			<b>LMB - add content;</b>
+			<b>LMB - move character;</b>
 			<b>MMB - move map;</b>
-			<b>RMB - modify content;</b>
+			<b class="master-only">RMB - change hex visibility;</b>
 		</div>
 
-		<div class="painting-controls">
+		<!-- <div class="painting-controls">
 			<label class="for-painting-mode">
 				<input type="checkbox" id="painting-mode-checkbox">
 				<span>painting mode; LMB</span>
@@ -40,33 +41,9 @@
 					<span>space</span>
 				</label>
 			</fieldset>
-		</div>
+		</div> -->
 
-		<div class="color-picker">
-			<label class="for-floor-variants">
-				<span>floor variant</span>
-				<select id="floor-variant-select">
-
-				</select>
-			</label>
-			<label class="for-space-variants">
-				<span>space variant</span>
-				<select id="space-variant-select">
-					
-				</select>
-			</label>
-		</div>
-
-		<div class="background-picker">
-			<label class="for-background-variants">
-				<span>background picture</span>
-				<select id="background-variant-select">
-
-				</select>
-			</label>
-		</div>
-
-		<button id="save-button">Сохранить</button>
+		<button id="complete-turn-button" class="master-only">Подтвердить ход</button>
 	</div>
 
 
@@ -111,8 +88,10 @@
 
 	<!--jquery-->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<!--socket.io (served by server)-->
+	<script src="/socket.io/socket.io.js"></script>
 	<!--custom scripts-->
 	<script src="../js/common.js"></script>
-	<script src="../js/setting_map.js"></script>
+	<script src="../js/gameplay.js"></script>
 </body>
 </html>

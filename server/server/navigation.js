@@ -44,5 +44,15 @@ router.get('/setting_map', (req, res) => {
     }
 });
 
+router.get('/gameplay', (req, res) => {
+    try {
+        const resPath = path.resolve(__dirname, '../client/views/gameplay.html');
+        res.sendFile(resPath);
+    } catch (e) {
+        console.error('Error fetching map settings:', e);
+        res.status(500).json({ error: 'Internal server error ' + e });
+    }
+});
+
 // Export the router
 module.exports = router;

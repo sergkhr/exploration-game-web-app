@@ -38,7 +38,7 @@ function authenticateToken(req, res, next) {
 //________________________________________________________________________________________________
 // Export the router
 // actual implementation is also here
-module.exports = function(mongooseConnection) {
+module.exports = function(mongooseConnection, ws_server) {
     async function getSettings(req, res) {
         try {
             res.json({ floorVariants_full, spaceVariants_full, contentVariants_full, backgroundVariants_full });
@@ -260,10 +260,236 @@ module.exports = function(mongooseConnection) {
 		}
 	}
 
+    /**
+     * Retrieves a game by name.
+     * Accessible to both master and player users.
+     */
+    async function getGameByName(req, res) {
+        try {
+            // Allow only authorized users (master and player) to fetch games
+            if (req.user.role !== 'master' && req.user.role !== 'player') {
+                return res.status(403).json({ error: 'Only authorized users can fetch games' });
+            }
+            
+            const gameName = req.query.name;
+            const game = await Game.findOne({ name: gameName });
+            if (!game) {
+                return res.status(404).json({ error: 'Game not found' });
+            }
+            res.json(game);
+        } catch (e) {
+            res.status(500).json({ error: 'Internal server error ' + e });
+        }
+    }
+
+    /**
+     * Creates a new game.
+     * Accessible only to master users.
+     * Also checks that the map specified (via mapName) exists.
+     */
+    async function createGame(req, res) {
+        try {
+            // Only master users can create games.
+            if (req.user.role !== 'master') {
+                return res.status(403).json({ error: 'Only master users are allowed to create games' });
+            }
+            
+            const { name, mapName, currentTime, settings } = req.body;
+            if (!name || !mapName || currentTime === undefined || !settings) {
+                return res.status(400).json({ error: 'Invalid request. Required fields: name, mapName, currentTime, settings.' });
+            }
+            
+            // Check if a game with the same name already exists.
+            const existingGame = await Game.findOne({ name });
+            if (existingGame) {
+                return res.status(400).json({ error: 'Game with this name already exists' });
+            }
+            
+            // Check that the map used for the game exists.
+            const existingMap = await GameMap.findOne({ name: mapName });
+            if (!existingMap) {
+                return res.status(400).json({ error: 'Map used for the game does not exist' });
+            }
+            
+            // Create a new game object.
+            let newGame = new Game({
+                name,
+                mapName,
+                currentTime,
+                settings,
+                activeMap: existingMap // Save the entire map, so every hex is closed by default
+            });
+            
+            await newGame.save();
+            res.status(201).json({ message: 'Game created successfully' });
+        } catch (e) {
+            res.status(500).json({ error: 'Internal server error ' + e });
+        }
+    }
+
+    /**
+     * Updates an existing game.
+     * Accessible only to master users.
+     * Checks that, if the map is being updated, the new map exists.
+     */
+    async function updateGame(req, res) {
+        try {
+            // Only master users can update games.
+            if (req.user.role !== 'master') {
+                return res.status(403).json({ error: 'Only master users are allowed to update games' });
+            }
+            
+            const gameName = req.query.name; // Game name passed as a query parameter
+            const { mapName, currentTime, settings } = req.body; // Updated game data from the request body
+            
+            let game = await Game.findOne({ name: gameName });
+            if (!game) {
+                return res.status(404).json({ error: 'Game not found' });
+            }
+            
+            // If updating the map, check that the new map exists.
+            if (mapName) {
+                const existingMap = await GameMap.findOne({ name: mapName });
+                if (!existingMap) {
+                    return res.status(400).json({ error: 'Map used for the game does not exist' });
+                }
+                game.mapName = mapName;
+                game.activeMap = existingMap;
+            }
+            
+            if (currentTime !== undefined) {
+                game.currentTime = currentTime;
+            }
+            if (settings) {
+                game.settings = settings;
+            }
+            
+            await game.save();
+            res.json({ message: 'Game updated successfully' });
+        } catch (e) {
+            res.status(500).json({ error: 'Internal server error ' + e });
+        }
+    }
+
+    /**
+     * Deletes an existing game.
+     * Accessible only to master users.
+     */
+    async function deleteGame(req, res) {
+        try {
+            // Only master users can delete games.
+            if (req.user.role !== 'master') {
+                return res.status(403).json({ error: 'Only master users are allowed to delete games' });
+            }
+            
+            const gameName = req.query.name;
+            const deletedGame = await Game.findOneAndDelete({ name: gameName });
+            if (!deletedGame) {
+                return res.status(404).json({ error: 'Game not found' });
+            }
+            res.json({ message: 'Game deleted successfully' });
+        } catch (e) {
+            res.status(500).json({ error: 'Internal server error ' + e });
+        }
+    }
+
+
+
+    //________________________________________________________________________________
+    // web socket starts to appear
+
+    /**
+     * Changes visibility of a cell (toggles isClosed)
+     * Does not check permission – make sure it's checked at the caller
+     * 
+     * @param {string} gameName - Name of the game to update
+     * @param {number} i - Row index of the cell
+     * @param {number} j - Column index of the cell
+     */
+    async function changeCellVisibility(gameName, i, j) {
+        try {
+            const game = await Game.findOne({ name: gameName });
+            if (!game) {
+                console.error(`Game "${gameName}" not found`);
+                return;
+            }
+
+            // Validate cell coordinates
+            const cells = game.activeMap.cells;
+            if (!Array.isArray(cells) || !cells[i] || !cells[i][j]) {
+                console.error(`Invalid cell coordinates (${i}, ${j})`);
+                return;
+            }
+
+            // Toggle the isClosed value
+            const cell = cells[i][j];
+            cell.isClosed = !cell.isClosed;
+
+            await game.save();
+
+            // Notify all clients in the room about the change
+            ws_server.to(gameName).emit('cellVisibilityChanged', {
+                row: i,
+                column: j,
+                isClosed: cell.isClosed
+            });
+
+            console.log(`Cell (${i}, ${j}) visibility updated in game "${gameName}"`);
+        } catch (e) {
+            console.error('Error changing cell visibility:', e);
+        }
+    }
+
+
+
+    //connection to room
+    ws_server.on('connection', (socket) => {
+        console.log("A new client connected");
+
+
+
+        //client emits joinGame with gameName
+        socket.on('joinGame', (gameName) => {
+            socket.join(gameName);
+            console.log(`Client joined game: ${gameName}`);
+
+            // notify
+            ws_server.to(gameName).emit('playerJoined', `A user joined game "${gameName}"`);
+        });
+
+
+        //process toggle cell visibility
+        socket.on('toggleCellVisibility', async (data) => {
+            const { token, gameName, i, j } = data;
+    
+            try {
+                const decoded = jwt.verify(token, JWT_SECRET);
+                if (decoded.role !== 'master') {
+                    return socket.emit('error', { error: 'Only master can change visibility' });
+                }
+    
+                await changeCellVisibility(gameName, i, j);
+    
+            } catch (e) {
+                console.error("Error handling toggleCellVisibility:", e);
+                socket.emit('error', { error: 'Invalid token or internal error' });
+            }
+        });
+    });
+
+
+
+
+
+
+
+
+
 	//________________________________________________________________________________________________
 	// api endpoint
 	// we pass functions themselves as parameters to the router
     router.get('/settings', getSettings);
+
 	router.get('/maps', authenticateToken, getGameMapsNames);
     router.get('/getMap', authenticateToken, getGameMapByName); // ?name=mapName
     router.post('/maps', authenticateToken, createGameMap);
@@ -271,6 +497,10 @@ module.exports = function(mongooseConnection) {
     router.delete('/maps', authenticateToken, deleteGameMap); // ?name=mapName
 
     router.get('/games', authenticateToken, getGamesNames);
+    router.get('/getGame', authenticateToken, getGameByName); // ?name=gameName
+    router.post('/games', authenticateToken, createGame);
+    router.put('/games', authenticateToken, updateGame); // ?name=gameName
+    router.delete('/games', authenticateToken, deleteGame); // ?name=gameName
 
 	return router;
 };

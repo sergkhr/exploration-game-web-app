@@ -218,8 +218,8 @@ function populateMap(map){
 
     let container = map_container;
     container.find('.hex').remove();
-    let calculated_cont_width = (column_number + 0.5) * hex_horizontal_width + (column_number - 1 + 0.5) * hex_gap   + 5 + $("#content_picker").width();
-    let calculated_cont_height = (row_number * 1.5 + 0.5) * hex_vertical_width + (row_number - 1) * hex_gap * Math.sin(Math.PI / 3)   + 4 + $("#content_picker").height();
+    let calculated_cont_width = (column_number + 0.5) * hex_horizontal_width + (column_number - 1 + 0.5) * hex_gap   + 5;
+    let calculated_cont_height = (row_number * 1.5 + 0.5) * hex_vertical_width + (row_number - 1) * hex_gap * Math.sin(Math.PI / 3)   + 4 ;
     container.css('min-width', calculated_cont_width + 'px');
     container.css('min-height', calculated_cont_height + 'px');
 
@@ -233,6 +233,7 @@ function populateMap(map){
                 let src_name = contentVariants_full[content.type];
                 let icon_hidden = content.isHidden ? "hidden" : "";
                 let content_element = $("<img src=\"../src/icons/" + src_name + "\" data-content-type=\"" + content.type + "\" class=\"content_icon" + " " + icon_hidden + "\" alt=\"er\">");
+                addModifyingMenu(content_element);
                 hex_content.push(content_element);
             });
             let content_html = hex_content.join('');
@@ -428,9 +429,9 @@ function addLeftClickEventToHexagons(){
 }
 
 /**
- * attaches a deletion function to the element
+ * attaches a modifying menu to the element
  * 
- * @param {jquery object} element to which a deletion function will be attached
+ * @param {jquery_object} element to which modifing menu will be attached
  */
 function addModifyingMenu($content) {
     $content.on('contextmenu', function(e) {

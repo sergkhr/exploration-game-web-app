@@ -60,10 +60,9 @@ body {
 }
 #top-button-block button {
   margin-top: -10px;
-}
-#top-button-block #back-to-main-page {
   box-sizing: border-box;
-  width: 200px;
+  min-width: 200px;
+  width: fit-content;
   padding: var(--standart-gap);
   background-color: rgba(var(--primary-light-color), 0.8);
   border: none;
@@ -75,7 +74,7 @@ body {
   cursor: pointer;
   transition: all var(--standart-animation-time) cubic-bezier(0.42, 0.1, 0.21, 0.99);
 }
-#top-button-block #back-to-main-page:hover {
+#top-button-block button:hover {
   transform: translateY(-5px);
   background-color: rgba(var(--primary-very-light-color), 0.8);
   box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
@@ -90,25 +89,6 @@ body {
 }
 #top-button-block .color-picker label span {
   display: block;
-}
-#top-button-block #save-button {
-  box-sizing: border-box;
-  width: 200px;
-  padding: var(--standart-gap);
-  background-color: rgba(var(--primary-light-color), 0.8);
-  border: none;
-  border-radius: 5px;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
-  color: rgb(var(--white-color));
-  font-size: 1.5em;
-  font-weight: 400;
-  cursor: pointer;
-  transition: all var(--standart-animation-time) cubic-bezier(0.42, 0.1, 0.21, 0.99);
-}
-#top-button-block #save-button:hover {
-  transform: translateY(-5px);
-  background-color: rgba(var(--primary-very-light-color), 0.8);
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;
 }
 #top-button-block #save-button::after {
   content: "";
@@ -149,15 +129,14 @@ body {
   align-items: center;
   position: relative;
   transform: scale(1);
-  contain: strict;
 }
 #container #map_container::after {
   content: "";
   position: absolute;
   top: calc(var(--hexagon-side-size) / 2);
   left: calc(var(--hexagon-size) / 2);
-  width: calc(100% - var(--hexagon-size) - 200px);
-  height: calc(100% - var(--hexagon-side-size) - 280px);
+  width: calc(100% - var(--hexagon-size));
+  height: calc(100% - var(--hexagon-side-size));
   backdrop-filter: blur(3px);
   z-index: -10;
 }
@@ -218,7 +197,7 @@ body {
 #container .hex {
   width: var(--hexagon-size);
   height: var(--hexagon-side-size);
-  opacity: 0.8;
+  opacity: 0.95;
   background-color: rgba(var(--floor-color), 1);
   background-repeat: no-repeat;
   background-position: 50% 50%;
@@ -229,7 +208,7 @@ body {
   zoom: 1;
   border-left: 1px solid rgba(var(--black-color), 1);
   border-right: 1px solid rgba(var(--black-color), 1);
-  transition: filter var(--standart-animation-time) ease;
+  transition: filter var(--slow-animation-time) ease;
 }
 #container .hex.space {
   background-color: rgba(var(--space-color), 1);
@@ -301,6 +280,7 @@ body {
   bottom: 0;
 }
 #container .hex:hover {
+  transition: filter var(--quick-animation-time) ease;
   filter: brightness(0.9) contrast(1.1);
   cursor: pointer;
 }
