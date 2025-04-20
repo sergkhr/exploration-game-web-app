@@ -9,7 +9,15 @@ let outer_container = $("#container");
 let work_game;
 let work_map; // for map that is saved not inside the game itself
 
-const socket = io(); // connection to web socket server
+let waiting_for_turn_confirmation = false;
+
+
+// connection to web socket server
+const socket = io({
+    auth: {
+        token: sessionStorage.getItem("token")
+    }
+}); 
 
 // let is_painting_mode = false;
 // let painting_cell_type = "floor";
@@ -139,6 +147,10 @@ $(document).ready(function() {
                 populateMap(activeMap, "master");
                 outer_container.addClass("master");
                 addRightClickChangeVisibility($(".hex"));
+                addMasterCharacterMoveOnLeftClickToHex();
+
+                let characterPosition = work_game.characterPosition;
+                updateCharacterPosition(characterPosition.row, characterPosition.column);
             }).catch((error) => {
                 console.log(error);
             });
@@ -175,6 +187,10 @@ $(document).ready(function() {
 
                 populateMap(activeMap);
                 outer_container.addClass("player");
+                addPlayerCharacterMoveOnLeftClickToHex();
+
+                let characterPosition = work_game.characterPosition;
+                updateCharacterPosition(characterPosition.row, characterPosition.column);
             }).catch((error) => {
                 console.log(error);
             });
@@ -287,6 +303,22 @@ function changeBackground(background_type){
 }
 
 
+//turn confirmation stuff
+function showConfirmButton(){
+    $("#complete-turn-button").removeClass("hidden");
+    waiting_for_turn_confirmation = true;
+}
+$("#complete-turn-button").click(function(){
+    let character = $("#character");
+    let to_i = character.data("row");
+    let to_j = character.data("column");
+
+    socket.emit('moveCharacter', {
+        gameName: work_game.name,
+        row: to_i,
+        column: to_j
+    });
+}); 
 
 ///////////////////////////////////////////////////////////////////////////
 ////////////////////HEXAGON CONTROLS///////////////////////////////////////
@@ -310,14 +342,7 @@ function addRightClickChangeVisibility($element) {
 
 
 function requestToggleCellVisibility(gameName, i, j) {
-    const token = sessionStorage.getItem("token");
-    if (!token) {
-        console.error("Missing auth token");
-        return;
-    }
-
     socket.emit("toggleCellVisibility", {
-        token: token,
         gameName: gameName,
         i: i,
         j: j
@@ -329,6 +354,144 @@ function getHexByCoordinates(i, j) {
     return $(".hex").filter(function() {
         return $(this).data("row") === i && $(this).data("column") === j;
     }).first(); // возвращает первый найденный hex
+}
+
+
+//magic
+function areHexesAdjacent(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const isEvenRow = x1 % 2 === 0;
+    const adjacentOffsets = isEvenRow
+        ? [[-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0], [1, 1]]
+        : [[-1, -1], [-1, 0], [0, -1], [0, 1], [1, -1], [1, 0]];
+
+    return adjacentOffsets.some(([dxOffset, dyOffset]) => dx === dxOffset && dy === dyOffset);
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+////////////////////CHARATER POSITIONING///////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+
+function updateCharacterPosition(row, column){
+    let character = $("#character");
+    let hex = getHexByCoordinates(row, column);
+    if (!hex.length) {
+        console.log("Hex not found");
+        return; 
+    }
+
+    const x = parseFloat(hex.css("left")) + (hex.outerWidth() - character.outerWidth()) / 2;
+
+    character.css("left", x + "px");
+    character.css("top", hex.css("top"));
+
+    character.data("row", row);
+    character.data("column", column);
+
+    $("#character-ghost").addClass("hidden");
+    waiting_for_turn_confirmation = false;
+    $("#complete-turn-button").addClass("hidden");
+}
+
+/**
+ * changes the character position and leaves the "ghost" behind
+ * @param {Number} row where to move
+ * @param {Number} column where to move
+ * @returns 
+ */
+function characterMoveByPlayer(row, column){
+    let character = $("#character");
+    let character_ghost = $("#character-ghost");
+    let hex = getHexByCoordinates(row, column);
+    if (!hex.length) {
+        console.log("Hex not found");
+        return; 
+    }
+
+    character_ghost.css("left", character.css("left"));
+    character_ghost.css("top", character.css("top"));
+    character_ghost.data("row", character.data("row"));
+    character_ghost.data("column", character.data("column"));
+    character_ghost.removeClass("hidden");
+
+
+    const x = parseFloat(hex.css("left")) + (hex.outerWidth() - character.outerWidth()) / 2;
+
+    character.css("left", x + "px");
+    character.css("top", hex.css("top"));
+    character.data("row", row);
+    character.data("column", column);
+}
+
+/**
+ * adds left click to all .hex
+ * on click tries to move the character to the clicked hex
+ * 
+ * Checks for everything here
+ */
+function addMasterCharacterMoveOnLeftClickToHex(){
+    $(".hex").on("click", function(event) {
+        let character = $("#character");
+        let from_i = character.data("row");
+        let from_j = character.data("column");
+        
+
+        let hex = $(this);
+        let to_i = hex.data("row");
+        let to_j = hex.data("column")
+
+        if(from_i === to_i && from_j === to_j) return;
+
+        socket.emit('moveCharacter', {
+            gameName: work_game.name,
+            row: to_i,
+            column: to_j
+        });
+    });
+}
+
+/**
+ * adds left click to all .hex
+ * on click tries to move the character to the clicked hex
+ * 
+ * Checks for everything here
+ */
+function addPlayerCharacterMoveOnLeftClickToHex(){
+    $(".hex").on("click", function(event) {
+        let character = $("#character");
+        let from_i = character.data("row");
+        let from_j = character.data("column");
+        
+
+        let hex = $(this);
+        let to_i = hex.data("row");
+        let to_j = hex.data("column")
+
+        if(!areHexesAdjacent(from_i, from_j, to_i, to_j)){
+            console.warn("players can only move character to an adjacent hex");
+            return;
+        }
+        if(hex.hasClass("space")){
+            console.warn("players cannot move character to the space hexes");
+            return;
+        }
+        if(from_i === to_i && from_j === to_j) return;
+        if(waiting_for_turn_confirmation){
+            console.warn("still waiting for turn to be confirmed by master");
+            return;
+        }
+
+
+        if(!confirm("Are you sure you want to request the move there?")) return;
+
+        socket.emit('playerWantsToMoveCharacter', {
+            gameName: work_game.name,
+            row: to_i,
+            column: to_j
+        });
+    });
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -356,6 +519,33 @@ function subscribeToJoinGame(gameName){
             else hex.removeClass("closed");
         } else {
             console.log("Hex not found");
+        }
+    });
+
+    socket.on('moveDenied', (reason) => {
+        console.erroe("move was denied, reason: " + reason);
+    });
+
+    socket.on('characterMoved', ({row, column}) =>{
+        updateCharacterPosition(row, column);
+    });
+
+
+    //when move is being done by player
+    socket.on('playerRequestedMove', ({ row, column, gameName }) => {
+        characterMoveByPlayer(row, column);
+        
+        //master route
+        if(outer_container.hasClass('master')){
+            showConfirmButton();
+            return;
+        }
+
+        //player route
+        if(outer_container.hasClass('player')){
+            waiting_for_turn_confirmation = true;
+            console.log("Ждем подтверждения хода мастером")
+            return;
         }
     });
 }

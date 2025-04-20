@@ -16,6 +16,8 @@ let spaceVariants = Object.keys(spaceVariants_full);
 let contentVariants = Object.keys(contentVariants_full);
 let backgroundVariants = Object.keys(backgroundVariants_full);
 
+let waiting_for_turn_confirmation = false;
+
 console.log("content variants:\n" + contentVariants);
 
 // Middleware to verify JWT token
@@ -230,6 +232,10 @@ module.exports = function(mongooseConnection, ws_server) {
 
     //________________________________________________________________________________________________
     // game api
+    const characterSchema = new mongoose.Schema({
+        row: {type: Number, required: true},
+        column: {type: Number, required: true}
+    });
     const gameSchema = new mongoose.Schema({
         name: {type: String, unique: true, required: true},
         mapName: {type: String, required: true},
@@ -239,7 +245,8 @@ module.exports = function(mongooseConnection, ws_server) {
             riskDangerChance: [{type: Number, required: true}],
             riskTresureChance: [{type: Number, required: true}],
         },
-        activeMap: mapSchema
+        activeMap: mapSchema,
+        characterPosition: characterSchema
     });
 
     const Game = mongooseConnection.model('Game', gameSchema);
@@ -310,6 +317,8 @@ module.exports = function(mongooseConnection, ws_server) {
             if (!existingMap) {
                 return res.status(400).json({ error: 'Map used for the game does not exist' });
             }
+
+            let characterPosition = {row: 0, column: 0};
             
             // Create a new game object.
             let newGame = new Game({
@@ -317,7 +326,8 @@ module.exports = function(mongooseConnection, ws_server) {
                 mapName,
                 currentTime,
                 settings,
-                activeMap: existingMap // Save the entire map, so every hex is closed by default
+                activeMap: existingMap, // Save the entire map, so every hex is closed by default
+                characterPosition: characterPosition
             });
             
             await newGame.save();
@@ -441,11 +451,106 @@ module.exports = function(mongooseConnection, ws_server) {
     }
 
 
+    /**
+     * Возвращает список соседних координат и самой клетки
+     * @param {number} i - строка (row)
+     * @param {number} j - колонка (column)
+     * @returns {Array} - массив из пар [i, j]
+     */
+    function getHexWithNeighbors(i, j) {
+        // Смещения для соседей в чётных строках
+        const evenRowOffsets = [
+            [-1,  0], // top-left
+            [-1,  1], // top-right
+            [ 0, -1], // left
+            [ 0,  0], // self
+            [ 0,  1], // right
+            [ 1,  0], // bottom-left
+            [ 1,  1]  // bottom-right
+        ];
+
+        // Смещения для соседей в нечётных строках
+        const oddRowOffsets = [
+            [-1, -1], // top-left
+            [-1,  0], // top-right
+            [ 0, -1], // left
+            [ 0,  0], // self
+            [ 0,  1], // right
+            [ 1, -1], // bottom-left
+            [ 1,  0]  // bottom-right
+        ];
+
+        const offsets = (i % 2 === 0) ? evenRowOffsets : oddRowOffsets;
+
+        return offsets.map(([di, dj]) => [i + di, j + dj]);
+    }
+
+    async function openCellsAroundCharacter(gameName){
+        try {
+            const game = await Game.findOne({ name: gameName });
+            if (!game) {
+                console.error(`Game "${gameName}" not found`);
+                return;
+            }
+            let ch = game.characterPosition;
+            let ch_i = ch.row;
+            let ch_j = ch.column;
+            const cells = game.activeMap.cells;
+            if(!Array.isArray(cells)){
+                console.error(`something wrong with cells, all of em`);
+                return;
+            };
+
+            let allAround = getHexWithNeighbors(ch_i, ch_j);
+            for (let [i, j] of allAround) {
+                if (!cells[i] || !cells[i][j]) {
+                    break;
+                }
+                let cell = cells[i][j];
+                cell.isClosed = false;
+            }
+
+            await game.save();
+
+            for (let [i, j] of allAround) {
+                if (!cells[i] || !cells[i][j]) {
+                    break;
+                }
+                let cell = cells[i][j];
+                
+                // Notify all clients in the room about the change
+                //calls for each one - not best network optimization but works for now
+                ws_server.to(gameName).emit('cellVisibilityChanged', {
+                    row: i,
+                    column: j,
+                    isClosed: cell.isClosed
+                });
+            }
+            
+            console.log(`Cells updated around (${ch_i}, ${ch_j}) in game "${gameName}"`);
+        } catch (e) {
+            console.error('Error opening cells:', e);
+        }
+    }
+
+    
+
+
+    //middleware for authentication
+    ws_server.use((socket, next) => {
+        const token = socket.handshake.auth.token;
+        if (!token) return next(new Error("No token provided"));
+    
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+            if (err) return next(new Error("Invalid token"));
+            socket.role = decoded.role; // save the user role from token
+            next();
+        });
+    });
 
     //connection to room
     ws_server.on('connection', (socket) => {
         console.log("A new client connected");
-
 
 
         //client emits joinGame with gameName
@@ -460,11 +565,10 @@ module.exports = function(mongooseConnection, ws_server) {
 
         //process toggle cell visibility
         socket.on('toggleCellVisibility', async (data) => {
-            const { token, gameName, i, j } = data;
+            const { gameName, i, j } = data;
     
             try {
-                const decoded = jwt.verify(token, JWT_SECRET);
-                if (decoded.role !== 'master') {
+                if (socket.role !== 'master') {
                     return socket.emit('error', { error: 'Only master can change visibility' });
                 }
     
@@ -473,6 +577,83 @@ module.exports = function(mongooseConnection, ws_server) {
             } catch (e) {
                 console.error("Error handling toggleCellVisibility:", e);
                 socket.emit('error', { error: 'Invalid token or internal error' });
+            }
+        });
+
+
+
+        /**
+         * @param {String} gameName 
+         * @returns {Structure} {row, column}
+         */
+        async function getCharacterPosition(gameName) {
+            const game = await Game.findOne({ name: gameName });
+            if (!game || !game.characterPosition) return null;
+            return game.characterPosition;
+        }
+
+        //magic
+        function areHexesAdjacent(x1, y1, x2, y2) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const isEvenRow = x1 % 2 === 0;
+            const adjacentOffsets = isEvenRow
+                ? [[-1, 0], [-1, 1], [0, -1], [0, 1], [1, 0], [1, 1]]
+                : [[-1, -1], [-1, 0], [0, -1], [0, 1], [1, -1], [1, 0]];
+
+            return adjacentOffsets.some(([dxOffset, dyOffset]) => dx === dxOffset && dy === dyOffset);
+        }
+
+        //receive player wants to move character
+        socket.on('playerWantsToMoveCharacter', async (data) => {
+            const { gameName, row, column } = data;
+            
+            if(waiting_for_turn_confirmation){
+                socket.emit('moveDenied', { reason: 'Still waiting for master confirmation' });
+                return;
+            }
+        
+            const currentPosition = await getCharacterPosition(gameName);
+            if (!currentPosition) {
+                socket.emit('moveDenied', { reason: 'Character position not found' });
+                return;
+            }
+        
+            const isAdjacent = areHexesAdjacent(currentPosition.row, currentPosition.column, row, column);
+            if (!isAdjacent) {
+                socket.emit('moveDenied', { reason: 'Target cell is not adjacent' });
+                return;
+            }
+        
+            waiting_for_turn_confirmation = true;
+            ws_server.to(gameName).emit('playerRequestedMove', { row, column, gameName });
+        });
+
+        //move character by master
+        socket.on('moveCharacter', async (data) => {
+            const { gameName, row, column } = data;
+        
+            try {
+                if (socket.role !== 'master') {
+                    socket.emit('moveDenied', { reason: 'Unauthorized' });
+                    return;
+                }
+        
+                const game = await Game.findOne({ name: gameName });
+                if (!game) {
+                    socket.emit('moveDenied', { reason: 'Game not found' });
+                    return;
+                }
+        
+                game.characterPosition = { row, column };
+                await game.save();
+                await openCellsAroundCharacter(gameName);
+        
+                waiting_for_turn_confirmation = false;
+                ws_server.to(gameName).emit('characterMoved', { row, column });
+        
+            } catch (err) {
+                socket.emit('moveDenied', { reason: 'Invalid token or internal error' });
             }
         });
     });

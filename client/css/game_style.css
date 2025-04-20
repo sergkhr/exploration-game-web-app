@@ -1,7 +1,37 @@
 :root {
   --fog-of-war-color: #343434;
 }
+#top-button-block #complete-turn-button.hidden {
+  visibility: hidden;
+}
 #top-button-block.player .master-only {
+  display: none;
+}
+#container #character {
+  position: absolute;
+  width: auto;
+  height: calc(var(--hexagon-side-size) * 0.8);
+  z-index: 50;
+  box-sizing: border-box;
+}
+#container #character img {
+  height: inherit;
+  width: inherit;
+}
+#container #character-ghost {
+  position: absolute;
+  width: auto;
+  height: calc(var(--hexagon-side-size) * 0.8);
+  z-index: 50;
+  box-sizing: border-box;
+  opacity: 0.6;
+  pointer-events: none;
+}
+#container #character-ghost img {
+  height: inherit;
+  width: inherit;
+}
+#container #character-ghost.hidden {
   display: none;
 }
 #container.master .hex.closed {
