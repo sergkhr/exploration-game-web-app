@@ -452,6 +452,7 @@ function addMasterCharacterMoveOnLeftClickToHex(){
     });
 }
 
+
 /**
  * adds left click to all .hex
  * on click tries to move the character to the clicked hex

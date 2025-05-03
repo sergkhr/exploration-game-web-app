@@ -452,13 +452,12 @@ module.exports = function(mongooseConnection, ws_server) {
 
 
     /**
-     * Возвращает список соседних координат и самой клетки
-     * @param {number} i - строка (row)
-     * @param {number} j - колонка (column)
-     * @returns {Array} - массив из пар [i, j]
+     * gets array of adjacent cells and the self cell
+     * @param {number} i - row
+     * @param {number} j - column
+     * @returns {Array} - array of pairs [i, j]
      */
     function getHexWithNeighbors(i, j) {
-        // Смещения для соседей в чётных строках
         const evenRowOffsets = [
             [-1,  0], // top-left
             [-1,  1], // top-right
@@ -469,7 +468,6 @@ module.exports = function(mongooseConnection, ws_server) {
             [ 1,  1]  // bottom-right
         ];
 
-        // Смещения для соседей в нечётных строках
         const oddRowOffsets = [
             [-1, -1], // top-left
             [-1,  0], // top-right
