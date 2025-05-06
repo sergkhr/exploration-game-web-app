@@ -36,12 +36,13 @@ function resizeContainerForContent(container, childrenSelector=null) {
  * @param {int} y vertical position of hexagon left top corner from top
  * @param {jquery object} container the container that will hold the map
  * @param {boolean} isFloor if the hexagon is a floor or a space
+ * @param {boolean} isClosed if the hexagon is closed by the fog of war, meant for the game, not for creation
  */
 function createHexagon(content, x, y, i, j, container, isFloor=true, isClosed=true){
     let hexagon = $('<div class="hex" data-row="' + i + '" data-column="' + j + '"></div>');
 
     // Create the inner div and add the content
-    let $inner = $('<div class="inner"></div>').html(content);
+    let $inner = $('<div class="inner"></div>').append(content);
 
     // Create the corner divs
     let $corner1 = $('<div class="corner-1"></div>');
@@ -86,6 +87,14 @@ function limitTranslationY(translateY, scale, map_container, outer_container, ga
     return Math.min(TranslateY_limit, Math.max(-TranslateY_limit, translateY));
 }
 
+/**
+ * function that controlls the resizing of map and everything inside of it
+ * 
+ * @param {Event} event object
+ * @param {jquery object} map_containter
+ * @param {jquery object} outer_container
+ * @param {jquery objects list} non_resized_elements - elements to be resized with the map
+ */
 function resizeMap(event, map_container, outer_container, non_resized_elements=null){
     // Get the current scale of the inner div
     let currentTransform = map_container.css('transform');

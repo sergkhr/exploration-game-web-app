@@ -15,4 +15,5 @@
 
 # How to turn on/update
 - update local files
+- (temp) make sure .env filr exists in root directory and it has JWT_SECRET and MASTER_PASSWORD variables set. Take note that .env is in gitignore, so you might need to create it 
 - run in root directory (where docker-compose.yml is located) "docker-compose up --build", for no logs: "docker-compose up --build -d"

@@ -95,7 +95,9 @@ $("#player-login-button").click(function () {
     }
 
     userLogin(playerName, playerPassword).then(() => {
-        //TODO: load active games list
+        getGames().then(games => {
+            populateSelectionList($("#game-name-selection-player"), games);
+        });
         showNavigation(4);
     }).catch(error => {
         alert("Error during player login: " + error);
@@ -119,7 +121,12 @@ $("#master-login-button").click(function() {
 });
 
 $("#master-join-game-button").click(function() {
-    //TODO: load active games list
+    getGames().then(games => {
+        populateSelectionList($("#game-name-selection"), games);
+    });
+    getGameMaps().then(maps => {
+        populateSelectionList($("#game-map-selection"), maps);
+    });
     showNavigation(6);
 });
 
@@ -386,4 +393,176 @@ $("#configure-map-button").click(function() {
         return;
     }
     goToConfigureMap(mapName);
+});
+
+
+//___________________________________________________________________________________________
+// work with games
+
+function getGames() {
+    return new Promise((resolve, reject) => {
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            url: "/api/games/games",
+            type: "GET",
+            headers: { "Authorization": `Bearer ${token}` },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}
+
+
+function createGame(gameName, mapName, settings, currentTime=0) {
+    return new Promise((resolve, reject) => {
+        if (!gameName || gameName === "") {
+            reject("Game name is empty");
+            return;
+        }
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            url: "/api/games/games",
+            type: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            data: { name: gameName, mapName: mapName, currentTime: currentTime, settings: settings},
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}
+$("#create-game-button").click(function() {
+    let gameName = $("#new-game-name-input").val();
+    let mapName = $("#game-map-selection").val();
+    let currentTime = 0; // for now
+    let settings = {
+        timeToMove: $("#new-game-timeToMove-input").val(),
+        riskDangerChance: [0.5, 0.5, 0.5, 0.5], // for now
+        riskTresureChance: [0.5, 0.5, 0.5, 0.5] // for now
+    };
+    
+    if (!gameName || gameName === "" || !mapName || mapName === "") {
+        alert("Please enter the game name and map name");
+        return;
+    }
+    if (!settings.timeToMove || settings.timeToMove === ""){
+        alert("Please enter the game time to move");
+        return;
+    }
+    if(settings.timeToMove < 0){
+        if(!confirm("Do you really want negative time to move?")) return;
+    }
+
+    createGame(gameName, mapName, settings, currentTime).then(() => {
+        console.log("Game created");
+        getGames().then(games => {
+            populateSelectionList($("#game-name-selection"), games);
+        });
+    }).catch(error => {
+        alert("Error during game creation: " + error);
+        console.error("Error during game creation:", error);
+    });
+});
+
+
+function deleteGame(gameName) {
+    return new Promise((resolve, reject) => {
+        if (gameName == "") {
+            reject("Game name is empty");
+            return;
+        }
+        let token = sessionStorage.getItem("token");
+        if (!token) {
+            reject("No token found");
+            return;
+        }
+        $.ajax({
+            //query parameter name
+            url: `/api/games/games?name=${gameName}`,
+            type: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` },
+            success: function (data) {
+                resolve(data);
+            },
+            error: function (xhr, status, error) {
+                let errorMessages = JSON.parse(xhr.responseText);
+                reject(error + ": " + errorMessages.error);
+            }
+        });
+    });
+}
+$("#delete-game-button").click(function() {
+    let gameName = $("#game-name-selection").val();
+    if (!gameName || gameName === "") {
+        alert("Please select the game name");
+        return;
+    }
+
+    if (confirm(`Are you sure you want to delete the game "${gameName}"?`)) {
+        deleteGame(gameName).then(() => {
+            console.log("Game deleted");
+            getGames().then(games => {
+                populateSelectionList($("#game-name-selection"), games);
+            });
+        }).catch(error => {
+            alert("Error during game deletion: " + error);
+            console.error("Error during game deletion:", error);
+        });
+    }
+});
+
+
+/**
+ * 
+ * @param {*} gameName game to be loaded 
+ * @param {*} role master or player based on that differnet startup routine will be performed
+ * @returns none
+ */
+function joinGame(gameName, role){
+    //store the map name in the session storage
+    sessionStorage.setItem("joiningGameName", gameName);
+    sessionStorage.setItem("role", role);
+    let token = sessionStorage.getItem("token");
+    if (!token) {
+        alert("No token found");
+        return;
+    }
+
+    window.location.href = "/gameplay";
+}
+
+//master
+$("#join-game-button").click(function() {
+    let gameName = $("#game-name-selection").val();
+    if (!gameName || gameName === "") {
+        alert("Please select the game name");
+        return;
+    }
+    joinGame(gameName, "master");
+});
+//player
+$("#join-game-button-player").click(function() {
+    let gameName = $("#game-name-selection-player").val();
+    if (!gameName || gameName === "") {
+        alert("Please select the game name");
+        return;
+    }
+    joinGame(gameName, "player");
 });

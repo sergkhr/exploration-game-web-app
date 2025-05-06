@@ -187,6 +187,19 @@ module.exports = function(mongooseConnection) {
 		}
 	}
 
+	async function checkIfPlayer(req, res){
+		try {
+			if (req.user.role !== 'player') {
+				return res.status(403).json({ error: 'You are not a player' });
+			}
+
+			res.status(200).json({ message: 'Player user' });
+		} catch (e) {
+			console.error('Error getting user role:', e);
+			res.status(500).json({ error: 'Internal server error ' + e });
+		}
+	}
+
 
 	//________________________________________________________________________________________________
 	// api endpoint
@@ -197,6 +210,7 @@ module.exports = function(mongooseConnection) {
 	router.get('/players', getPlayers);
 	router.get('/getPlayer', getPlayer);
 	router.get('/checkIfMaster', authenticateToken, checkIfMaster);
+	router.get('/checkIfPlayer', authenticateToken, checkIfPlayer);
 
 
 	return router;

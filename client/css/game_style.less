@@ -1,0 +1,63 @@
+:root{
+    --fog-of-war-color: rgb(52, 52, 52); 
+}
+
+#top-button-block{
+    #complete-turn-button.hidden{
+        visibility: hidden;
+    }
+
+    &.player{
+        .master-only{
+            display: none;
+        }
+    }
+}
+
+#container{
+    @character_style:{
+        position: absolute;
+        width: auto;
+        height: calc(var(--hexagon-side-size) * 0.8);
+        z-index: 50;
+        box-sizing: border-box;
+        img{
+            height: inherit;
+            width: inherit;
+        }
+    };
+    #character{
+        @character_style();
+    }
+    #character-ghost{
+        @character_style();
+        opacity: 0.6;
+        pointer-events: none;
+        &.hidden{
+            display: none;
+        }
+    }
+
+
+
+    &.master{
+        .hex.closed{
+            background:color-mix(in srgb, rgba(var(--floor-color), 1), var(--fog-of-war-color) 90%)
+        }
+        .hex.space.closed{
+            background:color-mix(in srgb, rgba(var(--space-color), 1), var(--fog-of-war-color) 90%)
+        }
+    }
+
+    &.player{
+        .hex.closed{
+            background-color: var(--fog-of-war-color);
+            .inner .content_icon{
+                display: none;
+            }
+        }
+        .hex .inner .content_icon.hidden{
+            display: none;
+        }
+    }
+}
