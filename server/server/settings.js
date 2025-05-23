@@ -38,7 +38,8 @@ contentVariants = {...contentVariants, ...buildings};
 // background variants
 // keys are the names of the background, values are the names of the images
 let backgroundVariants = {
-    "magic_castle": "magic_castle.jpg", //self explanatory
+    "magic_castle": "magic_castle.jpg",
+    "forest": "forest_1.jpg",
     "none": "none.jpg", //no background
 }
 //________________________________________________________________________________________________

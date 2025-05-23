@@ -142,9 +142,8 @@ $(document).ready(function() {
             
             getGameByName(gameName).then((game) => {
                 work_game = game;
-                let activeMap = work_game.activeMap;
 
-                populateMap(activeMap, "master");
+                populateMap(work_game, "master");
                 outer_container.addClass("master");
                 addRightClickChangeVisibility($(".hex"));
                 addMasterCharacterMoveOnLeftClickToHex();
@@ -183,9 +182,8 @@ $(document).ready(function() {
             
             getGameByName(gameName).then((game) => {
                 work_game = game;
-                let activeMap = work_game.activeMap;
 
-                populateMap(activeMap);
+                populateMap(work_game);
                 outer_container.addClass("player");
                 addPlayerCharacterMoveOnLeftClickToHex();
 
@@ -207,9 +205,14 @@ $(document).ready(function() {
     window.location.href = '/';
 });
 
-
-function populateMap(map, role="player"){
-    let mapName = map.name;
+/**
+ * 
+ * @param {*} game where to take map from (trust me, it needs to be game not map) 
+ * @param {*} role 
+ */
+function populateMap(game, role="player"){
+    let map = game.activeMap;
+    let mapName = game.mapName;
     let floor_type = map.settings.floor;
     let space_type = map.settings.space;
     let background_type = map.settings.background;

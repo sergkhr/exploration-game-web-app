@@ -317,6 +317,9 @@ module.exports = function(mongooseConnection, ws_server) {
             if (!existingMap) {
                 return res.status(400).json({ error: 'Map used for the game does not exist' });
             }
+            let mapClone = existingMap.toObject();
+            delete mapClone._id;
+            mapClone.name = mapClone.name + "_copy_" + Date.now();
 
             let characterPosition = {row: 0, column: 0};
             
@@ -326,7 +329,7 @@ module.exports = function(mongooseConnection, ws_server) {
                 mapName,
                 currentTime,
                 settings,
-                activeMap: existingMap, // Save the entire map, so every hex is closed by default
+                activeMap: mapClone, // Save the entire map, so every hex is closed by default
                 characterPosition: characterPosition
             });
             
@@ -502,7 +505,7 @@ module.exports = function(mongooseConnection, ws_server) {
             let allAround = getHexWithNeighbors(ch_i, ch_j);
             for (let [i, j] of allAround) {
                 if (!cells[i] || !cells[i][j]) {
-                    break;
+                    continue;
                 }
                 let cell = cells[i][j];
                 cell.isClosed = false;
@@ -512,7 +515,7 @@ module.exports = function(mongooseConnection, ws_server) {
 
             for (let [i, j] of allAround) {
                 if (!cells[i] || !cells[i][j]) {
-                    break;
+                    continue;
                 }
                 let cell = cells[i][j];
                 
@@ -669,7 +672,7 @@ module.exports = function(mongooseConnection, ws_server) {
 	// we pass functions themselves as parameters to the router
     router.get('/settings', getSettings);
 
-	router.get('/maps', authenticateToken, getGameMapsNames);
+    router.get('/maps', authenticateToken, getGameMapsNames);
     router.get('/getMap', authenticateToken, getGameMapByName); // ?name=mapName
     router.post('/maps', authenticateToken, createGameMap);
     router.put('/maps', authenticateToken, updateGameMap); // ?name=mapName
